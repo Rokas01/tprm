@@ -1,8 +1,8 @@
 #include PyPDF2
 
 import streamlit as st
+import PyPDF2
 from openai import OpenAI
-from PyPDF2 import PdfReader
 
 # Show title and description.
 st.title("📄 AI prototyping")
@@ -62,7 +62,7 @@ elif add_selectbox=="Document reviewer":
         # Process the uploaded file and question.
         # document = uploaded_file.read().decode()
 
-        reader = PdfReader(uploaded_file)
+        reader = PyPDF2.PdfReader(uploaded_file)
         reader_output = []
         for i in range(page_number):
             page = reader.pages[i]
@@ -114,7 +114,7 @@ elif add_selectbox=="Discount validation":
         #Process the uploaded file and question.
         discounts = uploaded_file_finance.read().decode()
 
-        reader = PdfReader(uploaded_file_contract)
+        reader = PyPDF2.PdfReader(uploaded_file_contract)
         reader_output = []
         for i in range(page_number):
             page = reader.pages[i]
@@ -207,9 +207,9 @@ elif add_selectbox=="Assessment support":
                 1. Text of an EU directive to audit against. 
                 2. Notes from the audit. 
                 Reply with three points: 
-                1. "Summary" - A coherent and easy to ready summary how requirements of each article are implemented. Group by article. Exclude articles with insufficient information to conclude.
-                2. "Follow-up questions" - a list of follow-up questions to ask in order to cover all requirements of {topic}. Group all questions by article. 
-                3. "Potential findings" - list of potential issues with refernece to the clause from {topic}. Only include findings explicitly mentioned in the notes. When writing findings add exact quote from the requirement, explain why is it a finding and propose questions to ask in order to validate.
+                "1. Summary" - A coherent and easy to ready summary how requirements of each article are implemented. Group by article. Do not include articles with insufficient information to conclude. Do not include articles with no information provided. 
+                "2. Follow-up questions" - a list of follow-up questions to ask in order to cover all requirements of {topic}. Group all questions by article. 
+                "3. Potential findings" - list of potential issues with refernece to the clause from {topic}. Only include findings explicitly mentioned in the notes. When writing findings add exact quote from the requirement, explain why is it a finding and propose questions to ask in order to validate.
                 Do not repeat instructions. Only use the text provided. \n---\n
                 Input 1 (Directive): \n---\n {NIS2} \n---\n
                 Input 2 (Notes):  \n---\n {notes}""",
