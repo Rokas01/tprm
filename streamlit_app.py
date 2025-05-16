@@ -5,13 +5,14 @@ from openai import OpenAI
 from PyPDF2 import PdfReader
 
 # Show title and description.
-st.title("📄 Deloitte AI prototyping")
+st.title("📄 AI prototyping")
+
 
 
 add_selectbox = st.sidebar.selectbox(
     "Please select use-case",
     ("Document reviewer", "Duplicate checker", 
-     "Discount validation", "Auditor")
+     "Discount validation", "Assessment support")
 )
 
 # Using "with" notation
@@ -22,7 +23,7 @@ with st.sidebar:
     # via `st.secrets`, see https://docs.streamlit.io/develop/concepts/connections/secrets-management
     openai_api_key = st.text_input("API Key", type="password")
     
-    st.image("https://upload.wikimedia.org/wikipedia/commons/1/15/Deloitte_Logo.png")
+    # st.image("https://upload.wikimedia.org/wikipedia/commons/1/15/Deloitte_Logo.png")
 
 if not openai_api_key:
     st.info("Please add API key to continue.", icon="🗝️")
@@ -133,7 +134,7 @@ elif add_selectbox=="Discount validation":
 
         # Generate an answer using the OpenAI API.
         stream = client.chat.completions.create(
-            model="gpt-4o",
+            model="o3",
             messages=messages,
             stream=True,
         )
@@ -144,47 +145,77 @@ elif add_selectbox=="Discount validation":
         st.write(stream)
 
 
-elif add_selectbox=="Auditor":
+elif add_selectbox=="Assessment support":
 
     # Create an OpenAI client.
     client = OpenAI(api_key=openai_api_key)
 
+    with open("NIS2","r") as f:
+        NIS2 = f.read()
+
     framework = st.selectbox(
-    "Please select standard or framework in scope:",
+    "Please select the standard or framework in scope:",
     ("EU Directive 2022/2555 (NIS2)"),
     )
 
+    framework = NIS2 #overwriting while leaving the textbox in
+
     topic = st.selectbox(
-    "Please select topic:",
+    "Please select chapter:",
     ("Chapter 4 - CYBERSECURITY RISK-MANAGEMENT MEASURES AND REPORTING OBLIGATIONS", "Chapter 5 - JURISDICTION AND REGISTRATION"),
     )
 
     # Let the user upload a file via `st.file_uploader`.
 
+    Industry = st.text_input(
+    "Industry:",
+    placeholder="....")
+
+    HQ_location = st.text_input(
+    "HQ location:",
+    placeholder="Enter country of HQ")
+    
+    No_of_sites = st.text_input(
+    "No of manufacturing sites in scope for this assessment:",
+    placeholder="Enter the number of sites within EU")
+
+    Locations_of_sites = st.text_input(
+    "Locations of manufacturing sites in-scope for this assessment:",
+    placeholder="Enter locations (countries only) of all sites (e.g. Germany, Austria, Italy)")
+    
+
     # Ask the user for a question via `st.text_area`.
     notes = st.text_area(
-        "notes:",
+        "Meeting notes:",
         placeholder="Enter youyr notes here")
+    
 
     if notes and st.button("Process"):
 
         # Process the uploaded file and question.
         # document = uploaded_file.read().decode()
 
-
-
         messages = [
             {
                 "role": "user",
-                "content": f"""You are an expert auditor. I will input my notes from {framework} audit covering {topic}. 
-                You will reply with three points: 1. A list of follow-up questions and to ask in order to cover all requirements of the topic and directive. 
-                2. List of potential findings with refernce to the requirement or clause. If a specific topic is not discussed in the notes, do not asume it is a finding and do not mention it.
-                3. List of clauses and requirements with insufficient details to conclude. 
-                Do not repeat instructions. 
-                Notes:  \n\n---\n\n {notes}""",
+                "content": f"""You are an expert auditor specialising in EU regulations. Auditing a company with the following characteristics:
+                Operating in the {Industry} industry, 
+                head office located in {HQ_location}, 
+                {No_of_sites} manufacturing sites located in: {Locations_of_sites} .
+                The directive is only applicable for EU-based entities, however they can rely in services provided from outside the EU.
+                I will provide two inputs: 
+                1. Text of an EU directive to audit against. 
+                2. Notes from the audit. 
+                Reply with three points: 
+                1. "Summary" - A coherent and easy to ready summary how requirements of each article are implemented. Group by article. Exclude articles with insufficient information to conclude.
+                2. "Follow-up questions" - a list of follow-up questions to ask in order to cover all requirements of {topic}. Group all questions by article. 
+                3. "Potential findings" - list of potential issues with refernece to the clause from {topic}. Only include findings explicitly mentioned in the notes. When writing findings add exact quote from the requirement, explain why is it a finding and propose questions to ask in order to validate.
+                Do not repeat instructions. Only use the text provided. \n---\n
+                Input 1 (Directive): \n---\n {NIS2} \n---\n
+                Input 2 (Notes):  \n---\n {notes}""",
             }
         ]
- 
+
         # Generate an answer using the OpenAI API.
         stream = client.chat.completions.create(
             model="o4-mini",
