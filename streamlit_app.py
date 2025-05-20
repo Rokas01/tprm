@@ -282,9 +282,9 @@ elif add_selectbox=="Assessment support":
     )
 
     if (topic == "Chapter 4 - CYBERSECURITY RISK-MANAGEMENT MEASURES AND REPORTING OBLIGATIONS"):
-        regulatory_text_file = "NIS2-ch4"
+        regulatory_text_file = "NIS2-ch4.txt"
     else:
-        regulatory_text_file = "NIS2-ch5"
+        regulatory_text_file = "NIS2-ch5.txt"
 
 
     # framework = NIS2 #overwriting while leaving the textbox in
