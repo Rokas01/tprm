@@ -255,31 +255,20 @@ if add_selectbox=="Auditor":
             attachments= [{ "file_id": message_file.id, "tools": [{"type": "file_search"}] }]
         )
 
-
-
-        # Generate an answer using the OpenAI API.
-        stream1 = client.beta.threads.runs.create(
+        run = client.beta.threads.runs.create_and_poll(
             thread_id=thread.id,
             assistant_id=assistant.id,
-            model="o3",
-            messages=message1,
-            stream=True,
-        )
-    
-        st.write("===== 1. Summary ======")
-        st.write_stream(stream1)
-
-        # Generate an answer using the OpenAI API.
-        stream2 = client.beta.threads.runs.create(
-            thread_id=thread.id,
-            assistant_id=assistant.id,
-            model="o3",
-            messages=message2,
-            stream=True,
+            instructions="Please address the user as Jane Doe. The user has a premium account."
         )
 
-        st.write("===== 2. Follow-up questions ======")
-        st.write_stream(stream2)
+        if run.status == 'completed': 
+            messages = client.beta.threads.messages.list(
+                thread_id=thread.id
+            )
+            st.write(messages)
+        else:
+            st.write(run.status)
+
 
 
 
