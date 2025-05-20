@@ -12,7 +12,7 @@ st.title("📄 AI prototyping")
 add_selectbox = st.sidebar.selectbox(
     "Please select use-case",
     ("Document reviewer", "Duplicate checker", 
-     "Discount validation", "Assessment support")
+     "Discount validation", "Auditor", "Assessment support", )
 )
 
 # Using "with" notation
@@ -145,7 +145,146 @@ elif add_selectbox=="Discount validation":
         st.write(stream)
 
 
+if add_selectbox=="Auditor":
+
+    # Create an OpenAI client.
+    client = OpenAI(api_key=openai_api_key)
+
+    framework = st.selectbox(
+    "Please select the standard or framework in scope:",
+    ("EU Directive 2022/2555 (NIS2)"),
+    )
+
+    topic = st.selectbox(
+    "Please select chapter:",
+    ("Chapter 4 - CYBERSECURITY RISK-MANAGEMENT MEASURES AND REPORTING OBLIGATIONS", "Chapter 5 - JURISDICTION AND REGISTRATION"),
+    )
+
+    if (topic == "Chapter 4 - CYBERSECURITY RISK-MANAGEMENT MEASURES AND REPORTING OBLIGATIONS"):
+        regulatory_text_file = "NIS2-ch4"
+    else:
+        regulatory_text_file = "NIS2-ch5"
+    """
+    with open(regulatory_text_file,"rb") as f:
+        NIS2 = f.read()
+    """
+    # Let the user upload a file via `st.file_uploader`.
+
+    Industry = st.text_input(
+    "Industry:",
+    placeholder="....")
+
+    HQ_location = st.text_input(
+    "HQ location:",
+    placeholder="Enter country of HQ")
+    
+    No_of_sites = st.text_input(
+    "No of manufacturing sites in scope for this assessment:",
+    placeholder="Enter the number of sites within EU")
+
+    Locations_of_sites = st.text_input(
+    "Locations of manufacturing sites in-scope for this assessment:",
+    placeholder="Enter locations (countries only) of all sites (e.g. Germany, Austria, Italy)")
+    
+
+    # Ask the user for a question via `st.text_area`.
+    notes = st.text_area(
+        "Meeting notes:",
+        placeholder="Enter youyr notes here")
+
+    if notes and st.button("Process"):
+
+        assistant = client.beta.assistants.create(
+            name="Audit assistant",
+            instructions="""You are an expert audit assistant specialising in cybersecurity. Auditing a company with the following characteristics:
+                    Operating in the {Industry} industry, 
+                    head office located in {HQ_location}, 
+                    {No_of_sites} manufacturing sites located in: {Locations_of_sites} .""",
+            model="gpt-4o",
+            tools=[{"type": "file_search"}],
+        )
+
+        # Create a vector store caled "Financial Statements"
+        vector_store = client.beta.vector_stores.create(name="Legal text")
+
+        # Ready the files for upload to OpenAI
+        file_paths = ["NIS2-ch4.txt", "NIS2-ch5.txt"]
+        file_streams = [open(path, "rb") for path in file_paths]
+
+        # Use the upload and poll SDK helper to upload the files, add them to the vector store,
+        # and poll the status of the file batch for completion.
+        file_batch = client.beta.vector_stores.file_batches.upload_and_poll(
+        vector_store_id=vector_store.id, files=file_streams
+        )
+
+        # You can print the status and the file counts of the batch to see the result of this operation.
+        st.write(file_batch.status)
+        st.write(file_batch.file_counts)
+
+        # Process the uploaded file and question.
+        # document = uploaded_file.read().decode()
+
+        assistant = client.beta.assistants.update(
+        assistant_id=assistant.id,
+        tool_resources={"file_search": {"vector_store_ids": [vector_store.id]}},
+        )
+
+        message_file = client.files.create(
+        file=open("NIS2-ch4.txt", "rb"), purpose="assistants"
+        )
+
+        thread = client.beta.threads.create()
+
+        message1 = client.beta.threads.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content=f"""I will provide notes from my audit.
+                Reply with a coherent and easy to ready summary how requirements of each article are implemented. Group by article. Do not include articles with insufficient information to conclude. Do not include articles with no information provided. 
+                Do not repeat instructions. \n---\n
+                Notes:  \n---\n {notes}""",
+            attachments= [{ "file_id": message_file.id, "tools": [{"type": "file_search"}] }]
+        )
+
+        message2 = client.beta.threads.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content=f"""I will provide notes from my audit.
+                Reply with a list of follow-up questions to ask in order to cover all requirements of {topic}. Group all questions by article. 
+                Do not repeat instructions. \n---\n
+                Notes:  \n---\n {notes}""",
+            attachments= [{ "file_id": message_file.id, "tools": [{"type": "file_search"}] }]
+        )
+
+
+
+        # Generate an answer using the OpenAI API.
+        stream1 = client.beta.threads.runs.create(
+            thread_id=thread.id,
+            assistant_id=assistant.id,
+            model="o3",
+            messages=message1,
+            stream=True,
+        )
+    
+        st.write("===== 1. Summary ======")
+        st.write_stream(stream1)
+
+        # Generate an answer using the OpenAI API.
+        stream2 = client.beta.threads.runs.create(
+            thread_id=thread.id,
+            assistant_id=assistant.id,
+            model="o3",
+            messages=message2,
+            stream=True,
+        )
+
+        st.write("===== 2. Follow-up questions ======")
+        st.write_stream(stream2)
+
+
+
 elif add_selectbox=="Assessment support":
+
 
     # Create an OpenAI client.
     client = OpenAI(api_key=openai_api_key)
@@ -166,7 +305,7 @@ elif add_selectbox=="Assessment support":
         regulatory_text_file = "NIS2-ch5"
 
 
-    framework = NIS2 #overwriting while leaving the textbox in
+    # framework = NIS2 #overwriting while leaving the textbox in
 
     with open(regulatory_text_file,"r") as f:
         NIS2 = f.read()
@@ -225,7 +364,7 @@ elif add_selectbox=="Assessment support":
 
         # Generate an answer using the OpenAI API.
         stream = client.chat.completions.create(
-            model="o4-mini",
+            model="o3",
             messages=messages,
             stream=True,
         )
