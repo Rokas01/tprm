@@ -150,20 +150,26 @@ elif add_selectbox=="Assessment support":
     # Create an OpenAI client.
     client = OpenAI(api_key=openai_api_key)
 
-    with open("NIS2","r") as f:
-        NIS2 = f.read()
-
     framework = st.selectbox(
     "Please select the standard or framework in scope:",
     ("EU Directive 2022/2555 (NIS2)"),
     )
 
-    framework = NIS2 #overwriting while leaving the textbox in
-
     topic = st.selectbox(
     "Please select chapter:",
     ("Chapter 4 - CYBERSECURITY RISK-MANAGEMENT MEASURES AND REPORTING OBLIGATIONS", "Chapter 5 - JURISDICTION AND REGISTRATION"),
     )
+
+    if (topic == "Chapter 4 - CYBERSECURITY RISK-MANAGEMENT MEASURES AND REPORTING OBLIGATIONS"):
+        regulatory_text_file = "NIS2-ch4"
+    else:
+        regulatory_text_file = "NIS2-ch5"
+
+
+    framework = NIS2 #overwriting while leaving the textbox in
+
+    with open(regulatory_text_file,"r") as f:
+        NIS2 = f.read()
 
     # Let the user upload a file via `st.file_uploader`.
 
@@ -189,6 +195,7 @@ elif add_selectbox=="Assessment support":
         "Meeting notes:",
         placeholder="Enter youyr notes here")
     
+
 
     if notes and st.button("Process"):
 
