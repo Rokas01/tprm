@@ -257,7 +257,7 @@ if add_selectbox=="Auditor":
 
         stream = client.beta.threads.create_and_run(
             assistant_id=assistant.id,
-            thread=thread1.id,
+            thread=thread1,
             stream=True
         )
 
