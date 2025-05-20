@@ -233,10 +233,10 @@ if add_selectbox=="Auditor":
         file=open("NIS2-ch4.txt", "rb"), purpose="assistants"
         )
 
-        thread = client.beta.threads.create()
+        thread1 = client.beta.threads.create()
 
         message1 = client.beta.threads.messages.create(
-            thread_id=thread.id,
+            thread_id=thread1.id,
             role="user",
             content=f"""I will provide notes from my audit.
                 Reply with a coherent and easy to ready summary how requirements of each article are implemented. Group by article. Do not include articles with insufficient information to conclude. Do not include articles with no information provided. 
@@ -246,7 +246,7 @@ if add_selectbox=="Auditor":
         )
 
         message2 = client.beta.threads.messages.create(
-            thread_id=thread.id,
+            thread_id=thread1.id,
             role="user",
             content=f"""I will provide notes from my audit.
                 Reply with a list of follow-up questions to ask in order to cover all requirements of {topic}. Group all questions by article. 
@@ -255,20 +255,13 @@ if add_selectbox=="Auditor":
             attachments= [{ "file_id": message_file.id, "tools": [{"type": "file_search"}] }]
         )
 
-        run = client.beta.threads.runs.create_and_poll(
-            thread_id=thread.id,
+        stream = client.beta.threads.create_and_run(
             assistant_id=assistant.id,
-            instructions="Please address the user as Jane Doe. The user has a premium account."
+            thread=thread1.id,
+            stream=True
         )
 
-        if run.status == 'completed': 
-            messages = client.beta.threads.messages.list(
-                thread_id=thread.id
-            )
-            st.write(messages)
-        else:
-            st.write(run.status)
-
+        st.write_stream(stream)
 
 
 
