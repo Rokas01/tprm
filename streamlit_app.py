@@ -3,44 +3,36 @@
 import streamlit as st
 import PyPDF2
 from openai import OpenAI
+import os
+import pandas as pd
 
 # Show title and description.
+
+st.set_page_config(page_title="AI prototyping", layout="wide")
+
 st.title("📄 AI prototyping")
 
-from typing_extensions import override
-from openai import AssistantEventHandler
- 
-# First, we create a EventHandler class to define
-# how we want to handle the events in the response stream.
- 
-class EventHandler(AssistantEventHandler):    
-  @override
-  def on_text_created(self, text) -> None:
-    print(f"\nassistant > ", end="", flush=True)
-      
-  @override
-  def on_text_delta(self, delta, snapshot):
-    print(delta.value, end="", flush=True)
-      
-  def on_tool_call_created(self, tool_call):
-    print(f"\nassistant > {tool_call.type}\n", flush=True)
-  
-  def on_tool_call_delta(self, delta, snapshot):
-    if delta.type == 'code_interpreter':
-      if delta.code_interpreter.input:
-        print(delta.code_interpreter.input, end="", flush=True)
-      if delta.code_interpreter.outputs:
-        print(f"\n\noutput >", flush=True)
-        for output in delta.code_interpreter.outputs:
-          if output.type == "logs":
-            print(f"\n{output.logs}", flush=True)
+
+def openAI_processor(prompt, model_to_use):
+
+    stream = client.chat.completions.create(
+        model=model_to_use,
+        messages=prompt,
+        stream=False,
+    )
+
+    choices = stream .choices
+    chat_completion = choices[0]
+    content = chat_completion.message.content
+
+    return content
 
 
 
 add_selectbox = st.sidebar.selectbox(
     "Please select use-case",
     ("Document reviewer", "Duplicate checker", 
-     "Discount validation", "NIS2 assessment support", "Assessment support", )
+     "Discount validation", "DO NOT USE", "NIS2 assessment support", )
 )
 
 # Using "with" notation
@@ -173,9 +165,10 @@ elif add_selectbox=="Discount validation":
         st.write(stream)
 
 
-if add_selectbox=="NIS2 assessment support":
 
-    model_to_use ="o4-mini"
+elif add_selectbox=="NIS2 assessment support":
+
+    selected_model ="o4-mini"
 
     # Create an OpenAI client.
     client = OpenAI(api_key=openai_api_key)
@@ -185,21 +178,6 @@ if add_selectbox=="NIS2 assessment support":
     ("EU Directive 2022/2555 (NIS2)"),
     )
 
-    topic = st.selectbox(
-    "Please select chapter:",
-    ("Chapter 4 - CYBERSECURITY RISK-MANAGEMENT MEASURES AND REPORTING OBLIGATIONS", "Chapter 5 - JURISDICTION AND REGISTRATION"),
-    )
-
-    if (topic == "Chapter 4 - CYBERSECURITY RISK-MANAGEMENT MEASURES AND REPORTING OBLIGATIONS"):
-        regulatory_text_file = "NIS2-ch4.txt"
-    else:
-        regulatory_text_file = "NIS2-ch5.txt"
-
-
-    # framework = NIS2 #overwriting while leaving the textbox in
-
-    with open(regulatory_text_file,"r") as f:
-        NIS2 = f.read()
 
     # Let the user upload a file via `st.file_uploader`.
 
@@ -219,165 +197,106 @@ if add_selectbox=="NIS2 assessment support":
     "Locations of manufacturing sites in-scope for this assessment:",
     placeholder="Enter locations (countries only) of all sites (e.g. Germany, Austria, Italy)")
     
+
     # Ask the user for a question via `st.text_area`.
     notes = st.text_area(
         "Meeting notes:",
         placeholder="Enter your notes here")
+    
 
     if notes and st.button("Process"):
 
-        # Process the uploaded file and question.
-        # document = uploaded_file.read().decode()
+        regulatory_text_file = "NIS2-full.txt"
+        # framework = NIS2 #overwriting while leaving the textbox in
 
-        st.write("======= 1. Summary ======= ")
+        with open("NIS2-art26.txt","r") as f:
+            NIS2 = f.read()
 
-        message1 = [
+
+        message0 = [
             {
                 "role": "developer",
-                "content": f"""You are an expert auditor specialising in EU regulations. Auditing a company with the following characteristics:
-                Operating in the {Industry} industry, 
-                head office located in {HQ_location}, 
-                {No_of_sites} manufacturing sites located in: {Locations_of_sites} .
-                The directive is only applicable for EU-based entities, however they can rely in services provided from outside the EU.
-                I will provide two inputs: 
-                1. Text of an EU directive to audit against. 
-                2. Notes from the audit. 
-                Reply with a coherent and easy to ready summary how requirements of each article are implemented. Group by article. Do not include articles with insufficient information to conclude. Do not include articles with no information provided. 
+                "content": f"""You are a legal assistant. I will provide 2 inputs:
+                1. Information about the company.
+                2. Text of the applicability article of an EU directive.
+                Reply with a formal commentary if the directive is applicable for the company. Provide justificaiton. Do not repeat instructions. 
+                If the information provided is insufficient to conclude provide a list of follow-up questions.
+                Input 1 (Company data): 
+                1.1 Operating in the {Industry} industry, 
+                1.2 head office located in {HQ_location}, 
+                2.3 {No_of_sites} manufacturing sites located in: {Locations_of_sites} .
+                Input 2 (Directive): \n---\n {NIS2} \n---\n"""
+            }
+        ]
+
+        OpenAI_reply1 = openAI_processor(message0, selected_model)
+
+        st.write(f" **1. Overview and applicability**")
+        st.write(OpenAI_reply1)
+
+        st.write(f" **2. Assessment summary**")
+
+        directory = os.fsencode("NIS2-breakdown")
+
+        part_2_response_article =[]
+        part_2_response_AISummary =[]
+        part_2_response_AIFindings = []
+
+        for file in os.listdir(directory):
+            filename = os.fsdecode(file)
+
+            NIS2 = open(os.path.join("NIS2-breakdown", filename),'r')
+            article_title = NIS2.readline()
+            article_text = NIS2.read()
+            NIS2.close()
+
+            part_2_response_article.append(article_title)
+
+            message1 = [
+            {
+                "role": "developer",
+                "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                1. Article form the EU directive to audit against.
+                2. Notes from the audit.
+                Reply with a coherent and easy to read summary of how requirements of this article are implemented.
+                Do not repeat instructions. Do not repeat requirements. Only use the information provided in notes notes relevant for each article.
                 \n---\n
-                Input 1 (Directive): \n---\n {NIS2} \n---\n
+                Input 1 (article): \n---\n {article_title} {article_text} \n---\n
                 Input 2 (Notes):  \n---\n {notes}""",
             }
-        ]
+            ]
 
-        stream = client.chat.completions.create(
-            model=model_to_use,
-            messages=message1,
-            stream=True,
-        )
+            OpenAI_reply2 = openAI_processor(message1, selected_model)
 
-        st.write_stream(stream)
+            part_2_response_AISummary.append(OpenAI_reply2)
+            #part_2_response_AISummary.append(article_text)
 
-        st.write("======= 2. Observations ======= ")
-        message2 = [
+
+            message2 = [
             {
                 "role": "developer",
-                "content": f"""You are an expert auditor specialising in EU regulations. Auditing a company with the following characteristics:
-                Operating in the {Industry} industry, 
-                head office located in {HQ_location}, 
-                {No_of_sites} manufacturing sites located in: {Locations_of_sites} .
-                The directive is only applicable for EU-based entities, however they can rely in services provided from outside the EU.
-                I will provide two inputs: 
-                1. Text of an EU directive to audit against. 
-                2. Notes from the audit. 
-                Reply with a list of potential issues with refernece to the clause from on the second column. Only include findings explicitly mentioned in the notes. When writing findings add exact quote from the requirement, explain why is it a finding and propose questions to ask in order to validate.
-                 \n---\n
-                Input 1 (Directive): \n---\n {NIS2} \n---\n
+                "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                1. Article form the EU directive to audit against.
+                2. Notes from the audit.
+                Reply with a a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
+                Do not repeat instructions. Only use the information from notes relevant for each article. Do not provide implementation summary.
+                \n---\n
+                Input 1 (article): \n---\n {article_title} {article_text} \n---\n
                 Input 2 (Notes):  \n---\n {notes}""",
             }
-        ]
+            ]
 
-        stream = client.chat.completions.create(
-            model=model_to_use,
-            messages=message2,
-            stream=True,
-        )
+            OpenAI_reply3 = openAI_processor(message2, selected_model)
+            part_2_response_AIFindings.append(OpenAI_reply3)
+            #part_2_response_AIFindings.append(article_text)
 
-        st.write_stream(stream)
-        # Stream the response to the app using `st.write_stream`.
-        st.write_stream(stream)
+        part_2_response = pd.DataFrame()
+        part_2_response['Summary'] = part_2_response_AISummary
+        part_2_response['Potential findings'] = part_2_response_AIFindings
+        part_2_response.index = part_2_response_article
 
+        st.dataframe(part_2_response, height=1500, row_height=400)
 
-
-elif add_selectbox=="Assessment support":
-
-
-    # Create an OpenAI client.
-    client = OpenAI(api_key=openai_api_key)
-
-    framework = st.selectbox(
-    "Please select the standard or framework in scope:",
-    ("EU Directive 2022/2555 (NIS2)"),
-    )
-
-    topic = st.selectbox(
-    "Please select chapter:",
-    ("Chapter 4 - CYBERSECURITY RISK-MANAGEMENT MEASURES AND REPORTING OBLIGATIONS", "Chapter 5 - JURISDICTION AND REGISTRATION"),
-    )
-
-    if (topic == "Chapter 4 - CYBERSECURITY RISK-MANAGEMENT MEASURES AND REPORTING OBLIGATIONS"):
-        regulatory_text_file = "NIS2-ch4.txt"
-    else:
-        regulatory_text_file = "NIS2-ch5.txt"
-
-
-    # framework = NIS2 #overwriting while leaving the textbox in
-
-    with open(regulatory_text_file,"r") as f:
-        NIS2 = f.read()
-
-    # Let the user upload a file via `st.file_uploader`.
-
-    Industry = st.text_input(
-    "Industry:",
-    placeholder="....")
-
-    HQ_location = st.text_input(
-    "HQ location:",
-    placeholder="Enter country of HQ")
-    
-    No_of_sites = st.text_input(
-    "No of manufacturing sites in scope for this assessment:",
-    placeholder="Enter the number of sites within EU")
-
-    Locations_of_sites = st.text_input(
-    "Locations of manufacturing sites in-scope for this assessment:",
-    placeholder="Enter locations (countries only) of all sites (e.g. Germany, Austria, Italy)")
-    
-
-    # Ask the user for a question via `st.text_area`.
-    notes = st.text_area(
-        "Meeting notes:",
-        placeholder="Enter youyr notes here")
-    
-
-
-    if notes and st.button("Process"):
-
-        # Process the uploaded file and question.
-        # document = uploaded_file.read().decode()
-
-        messages = [
-            {
-                "role": "user",
-                "content": f"""You are an expert auditor specialising in EU regulations. Auditing a company with the following characteristics:
-                Operating in the {Industry} industry, 
-                head office located in {HQ_location}, 
-                {No_of_sites} manufacturing sites located in: {Locations_of_sites} .
-                The directive is only applicable for EU-based entities, however they can rely in services provided from outside the EU.
-                I will provide two inputs: 
-                1. Text of an EU directive to audit against. 
-                2. Notes from the audit. 
-                Reply with three points: 
-                "1. Summary" - A coherent and easy to ready summary how requirements of each article are implemented. Group by article. Do not include articles with insufficient information to conclude. Do not include articles with no information provided. 
-                "2. Follow-up questions" - a list of follow-up questions to ask in order to cover all requirements of {topic}. Group all questions by article. 
-                "3. Potential findings" - list of potential issues with refernece to the clause from {topic}. Only include findings explicitly mentioned in the notes. When writing findings add exact quote from the requirement, explain why is it a finding and propose questions to ask in order to validate.
-                Do not repeat instructions. Only use the text provided. \n---\n
-                Input 1 (Directive): \n---\n {NIS2} \n---\n
-                Input 2 (Notes):  \n---\n {notes}""",
-            }
-        ]
-
-        # Generate an answer using the OpenAI API.
-        stream = client.chat.completions.create(
-            model="o3",
-            messages=messages,
-            stream=True,
-        )
-
-        st.write("Response:")
-
-        # Stream the response to the app using `st.write_stream`.
-        st.write_stream(stream)
 
 else:
     st.write("Not yet implemented")
