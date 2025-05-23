@@ -203,6 +203,7 @@ elif add_selectbox=="NIS2 assessment support":
         "Meeting notes:",
         placeholder="Enter your notes here")
     
+    st.write(f" **Important: ** the assessment is only performed agaisnt articles 20, 21, 23 and 24 + applicability against art.3 and art.26.")
 
     if notes and st.button("Process"):
 
