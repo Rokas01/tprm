@@ -7,12 +7,40 @@ from openai import OpenAI
 # Show title and description.
 st.title("📄 AI prototyping")
 
+from typing_extensions import override
+from openai import AssistantEventHandler
+ 
+# First, we create a EventHandler class to define
+# how we want to handle the events in the response stream.
+ 
+class EventHandler(AssistantEventHandler):    
+  @override
+  def on_text_created(self, text) -> None:
+    print(f"\nassistant > ", end="", flush=True)
+      
+  @override
+  def on_text_delta(self, delta, snapshot):
+    print(delta.value, end="", flush=True)
+      
+  def on_tool_call_created(self, tool_call):
+    print(f"\nassistant > {tool_call.type}\n", flush=True)
+  
+  def on_tool_call_delta(self, delta, snapshot):
+    if delta.type == 'code_interpreter':
+      if delta.code_interpreter.input:
+        print(delta.code_interpreter.input, end="", flush=True)
+      if delta.code_interpreter.outputs:
+        print(f"\n\noutput >", flush=True)
+        for output in delta.code_interpreter.outputs:
+          if output.type == "logs":
+            print(f"\n{output.logs}", flush=True)
+
 
 
 add_selectbox = st.sidebar.selectbox(
     "Please select use-case",
     ("Document reviewer", "Duplicate checker", 
-     "Discount validation", "Auditor", "Assessment support", )
+     "Discount validation", "NIS2 assessment support", "Assessment support", )
 )
 
 # Using "with" notation
@@ -145,7 +173,9 @@ elif add_selectbox=="Discount validation":
         st.write(stream)
 
 
-if add_selectbox=="Auditor":
+if add_selectbox=="NIS2 assessment support":
+
+    model_to_use ="o4-mini"
 
     # Create an OpenAI client.
     client = OpenAI(api_key=openai_api_key)
@@ -161,13 +191,16 @@ if add_selectbox=="Auditor":
     )
 
     if (topic == "Chapter 4 - CYBERSECURITY RISK-MANAGEMENT MEASURES AND REPORTING OBLIGATIONS"):
-        regulatory_text_file = "NIS2-ch4"
+        regulatory_text_file = "NIS2-ch4.txt"
     else:
-        regulatory_text_file = "NIS2-ch5"
-    """
-    with open(regulatory_text_file,"rb") as f:
+        regulatory_text_file = "NIS2-ch5.txt"
+
+
+    # framework = NIS2 #overwriting while leaving the textbox in
+
+    with open(regulatory_text_file,"r") as f:
         NIS2 = f.read()
-    """
+
     # Let the user upload a file via `st.file_uploader`.
 
     Industry = st.text_input(
@@ -186,81 +219,71 @@ if add_selectbox=="Auditor":
     "Locations of manufacturing sites in-scope for this assessment:",
     placeholder="Enter locations (countries only) of all sites (e.g. Germany, Austria, Italy)")
     
-
     # Ask the user for a question via `st.text_area`.
     notes = st.text_area(
         "Meeting notes:",
-        placeholder="Enter youyr notes here")
+        placeholder="Enter your notes here")
 
     if notes and st.button("Process"):
-
-        assistant = client.beta.assistants.create(
-            name="Audit assistant",
-            instructions="""You are an expert audit assistant specialising in cybersecurity. Auditing a company with the following characteristics:
-                    Operating in the {Industry} industry, 
-                    head office located in {HQ_location}, 
-                    {No_of_sites} manufacturing sites located in: {Locations_of_sites} .""",
-            model="gpt-4o",
-            tools=[{"type": "file_search"}],
-        )
-
-        # Create a vector store caled "Financial Statements"
-        vector_store = client.beta.vector_stores.create(name="Legal text")
-
-        # Ready the files for upload to OpenAI
-        file_paths = ["NIS2-ch4.txt", "NIS2-ch5.txt"]
-        file_streams = [open(path, "rb") for path in file_paths]
-
-        # Use the upload and poll SDK helper to upload the files, add them to the vector store,
-        # and poll the status of the file batch for completion.
-        file_batch = client.beta.vector_stores.file_batches.upload_and_poll(
-        vector_store_id=vector_store.id, files=file_streams
-        )
-
-        # You can print the status and the file counts of the batch to see the result of this operation.
-        st.write(file_batch.status)
-        st.write(file_batch.file_counts)
 
         # Process the uploaded file and question.
         # document = uploaded_file.read().decode()
 
-        assistant = client.beta.assistants.update(
-        assistant_id=assistant.id,
-        tool_resources={"file_search": {"vector_store_ids": [vector_store.id]}},
-        )
+        st.write("======= 1. Summary ======= ")
 
-        message_file = client.files.create(
-        file=open("NIS2-ch4.txt", "rb"), purpose="assistants"
-        )
-
-        thread1 = client.beta.threads.create()
-
-        message1 = client.beta.threads.messages.create(
-            thread_id=thread1.id,
-            role="user",
-            content=f"""I will provide notes from my audit.
+        message1 = [
+            {
+                "role": "developer",
+                "content": f"""You are an expert auditor specialising in EU regulations. Auditing a company with the following characteristics:
+                Operating in the {Industry} industry, 
+                head office located in {HQ_location}, 
+                {No_of_sites} manufacturing sites located in: {Locations_of_sites} .
+                The directive is only applicable for EU-based entities, however they can rely in services provided from outside the EU.
+                I will provide two inputs: 
+                1. Text of an EU directive to audit against. 
+                2. Notes from the audit. 
                 Reply with a coherent and easy to ready summary how requirements of each article are implemented. Group by article. Do not include articles with insufficient information to conclude. Do not include articles with no information provided. 
-                Do not repeat instructions. \n---\n
-                Notes:  \n---\n {notes}""",
-            attachments= [{ "file_id": message_file.id, "tools": [{"type": "file_search"}] }]
+                \n---\n
+                Input 1 (Directive): \n---\n {NIS2} \n---\n
+                Input 2 (Notes):  \n---\n {notes}""",
+            }
+        ]
+
+        stream = client.chat.completions.create(
+            model=model_to_use,
+            messages=message1,
+            stream=True,
         )
 
-        message2 = client.beta.threads.messages.create(
-            thread_id=thread1.id,
-            role="user",
-            content=f"""I will provide notes from my audit.
-                Reply with a list of follow-up questions to ask in order to cover all requirements of {topic}. Group all questions by article. 
-                Do not repeat instructions. \n---\n
-                Notes:  \n---\n {notes}""",
-            attachments= [{ "file_id": message_file.id, "tools": [{"type": "file_search"}] }]
+        st.write_stream(stream)
+
+        st.write("======= 2. Observations ======= ")
+        message2 = [
+            {
+                "role": "developer",
+                "content": f"""You are an expert auditor specialising in EU regulations. Auditing a company with the following characteristics:
+                Operating in the {Industry} industry, 
+                head office located in {HQ_location}, 
+                {No_of_sites} manufacturing sites located in: {Locations_of_sites} .
+                The directive is only applicable for EU-based entities, however they can rely in services provided from outside the EU.
+                I will provide two inputs: 
+                1. Text of an EU directive to audit against. 
+                2. Notes from the audit. 
+                Reply with a list of potential issues with refernece to the clause from on the second column. Only include findings explicitly mentioned in the notes. When writing findings add exact quote from the requirement, explain why is it a finding and propose questions to ask in order to validate.
+                 \n---\n
+                Input 1 (Directive): \n---\n {NIS2} \n---\n
+                Input 2 (Notes):  \n---\n {notes}""",
+            }
+        ]
+
+        stream = client.chat.completions.create(
+            model=model_to_use,
+            messages=message2,
+            stream=True,
         )
 
-        stream = client.beta.threads.create_and_run(
-            assistant_id=assistant.id,
-            thread=thread1,
-            stream=True
-        )
-
+        st.write_stream(stream)
+        # Stream the response to the app using `st.write_stream`.
         st.write_stream(stream)
 
 
