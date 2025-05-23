@@ -218,14 +218,14 @@ elif add_selectbox=="NIS2 assessment support":
                 "role": "developer",
                 "content": f"""You are a legal assistant. I will provide 2 inputs:
                 1. Information about the company.
-                2. Text of the applicability article of an EU directive.
+                2. Two articles of the EU directive addressing its applicability.
                 Reply with a formal commentary if the directive is applicable for the company. Provide justificaiton. Do not repeat instructions. 
                 If the information provided is insufficient to conclude provide a list of follow-up questions.
                 Input 1 (Company data): 
                 1.1 Operating in the {Industry} industry, 
                 1.2 head office located in {HQ_location}, 
                 2.3 {No_of_sites} manufacturing sites located in: {Locations_of_sites} .
-                Input 2 (Directive): \n---\n {NIS2} \n---\n"""
+                Input 2 (articles): \n---\n {NIS2} \n---\n"""
             }
         ]
 
