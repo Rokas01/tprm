@@ -21,14 +21,12 @@ def add_slide(prs_object_input, layout_input, title_input):
     
     slide = prs_object_input.slides.add_slide(layout_input)
     slide.shapes.title.text = slide_heading_from_call
+    title_para = slide.shapes.title.text_frame.paragraphs[0]
+    title_para.font.size = Pt(26)
 
     shapes = slide.shapes
-    #title_shape = shapes.title
     body_shape = shapes.placeholders[1]
     tf = body_shape.text_frame
-    #tf.text = 'Requirement'
-    #tf.font.size = Pt(12)
-    #tf.font.bold = True
 
     p0 = tf.add_paragraph()
     p0.text = 'Requirement'
