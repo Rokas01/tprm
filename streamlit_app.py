@@ -187,9 +187,14 @@ elif add_selectbox=="NIS2 assessment support":
     ("EU Directive 2022/2555 (NIS2)"),
     )
 
+    st.write("Pelase select options:")
+    selection_applibability = st.checkbox("Applicability assessment")
+    selection_implementation_summary = st.checkbox("Implementation summary")
+    selection_observations = st.checkbox("Observations")
+    selection_risks = st.checkbox("Observations AND risks")   
 
     # Let the user upload a file via `st.file_uploader`.
-
+    st.write("Enter basic information about the organization:")
     Industry = st.text_input(
     "Industry:",
     placeholder="....")
@@ -207,6 +212,11 @@ elif add_selectbox=="NIS2 assessment support":
     placeholder="Enter locations (countries only) of all sites (e.g. Germany, Austria, Italy)")
     
 
+    OpenAI_reply1 = "applicability not requested"
+    OpenAI_reply2 = "summary not requested"
+    OpenAI_reply3 = "observations not requested"
+
+
     # Ask the user for a question via `st.text_area`.
     notes = st.text_area(
         "Meeting notes:",
@@ -214,7 +224,7 @@ elif add_selectbox=="NIS2 assessment support":
     
     st.write(f" **Important: ** the assessment is only performed against articles 20, 21, 23 and 24 + applicability check against art.3 and art.26.")
 
-    if notes and st.button("Process"):
+    if st.button("Process"):
 
         regulatory_text_file = "NIS2-full.txt"
         # framework = NIS2 #overwriting while leaving the textbox in
@@ -223,107 +233,115 @@ elif add_selectbox=="NIS2 assessment support":
             NIS2 = f.read()
 
 
-        message0 = [
-            {
-                "role": "developer",
-                "content": f"""You are a legal assistant. I will provide 2 inputs:
-                1. Information about the company.
-                2. Two articles of the EU directive addressing its applicability.
-                Reply with if the directive is applicable for the company. Provide justificaiton. Do not repeat instructions. 
-                If the information provided is insufficient to conclude provide a list of follow-up questions.
-                Input 1 (Company data): 
-                1.1 Operating in the {Industry} industry, 
-                1.2 head office located in {HQ_location}, 
-                2.3 {No_of_sites} manufacturing sites located in: {Locations_of_sites} .
-                Input 2 (articles): \n---\n {NIS2} \n---\n"""
-            }
-        ]
+        if selection_applibability:
 
-        OpenAI_reply1 = openAI_processor(message0, selected_model)
-
-        st.write(f" **1. Overview and applicability**")
-        st.write(OpenAI_reply1)
-
-        st.write(f" **2. Assessment summary**")
-
-        directory = os.fsencode("NIS2-breakdown")
-
-        part_2_response_article =[]
-        part_2_response_AISummary =[]
-        part_2_response_AIFindings = []
-        pptx_generator_input = []
-
-        for file in os.listdir(directory):
-            filename = os.fsdecode(file)
-
-            NIS2 = open(os.path.join("NIS2-breakdown", filename),'r')
-            article_title = NIS2.readline()
-            article_text = NIS2.read()
-            NIS2.close()
-
-            part_2_response_article.append(article_title)
-
-            message1 = [
-            {
-                "role": "developer",
-                "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
-                1. Article form the EU directive to audit against.
-                2. Notes from the audit.
-                Reply with a coherent and easy to read summary of how requirements of this article are implemented based on the notes provided.
-                When replying, follow the following rules:
-                1. Do not repeat instructions.
-                2. Do not repeat requirements.
-                4. Use only the information provided in the notes, do not include any additional context.
-                5. Maximum 200 words.
-                6. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:".
-                \n---\n
-                Input 1 (article): \n---\n {article_title} {article_text} \n---\n
-                Input 2 (Notes):  \n---\n {notes}""",
-            }
+            message0 = [
+                {
+                    "role": "developer",
+                    "content": f"""You are a legal assistant. I will provide 2 inputs:
+                    1. Information about the company.
+                    2. Two articles of the EU directive addressing its applicability.
+                    Reply with if the directive is applicable for the company. Provide justificaiton. Do not repeat instructions. 
+                    If the information provided is insufficient to conclude provide a list of follow-up questions.
+                    Input 1 (Company data): 
+                    1.1 Operating in the {Industry} industry, 
+                    1.2 head office located in {HQ_location}, 
+                    2.3 {No_of_sites} manufacturing sites located in: {Locations_of_sites} .
+                    Input 2 (articles): \n---\n {NIS2} \n---\n"""
+                }
             ]
 
-            OpenAI_reply2 = openAI_processor(message1, selected_model)
+            OpenAI_reply1 = openAI_processor(message0, selected_model)
 
-            part_2_response_AISummary.append(OpenAI_reply2)
-            #part_2_response_AISummary.append(article_text)
+            st.write(f" **1. Overview and applicability**")
+            st.write(OpenAI_reply1)
+
+        if selection_implementation_summary or selection_observations or selection_risks:
+
+            st.write(f" **2. Assessment summary**")
+
+            directory = os.fsencode("NIS2-breakdown")
+
+            part_2_response_article =[]
+            part_2_response_AISummary =[]
+            part_2_response_AIFindings = []
+            pptx_generator_input = []
+
+            for file in os.listdir(directory):
+                filename = os.fsdecode(file)
+
+                NIS2 = open(os.path.join("NIS2-breakdown", filename),'r')
+                article_title = NIS2.readline()
+                article_text = NIS2.read()
+                NIS2.close()
+
+                part_2_response_article.append(article_title)
+
+                if selection_implementation_summary:
+
+                    message1 = [
+                    {
+                        "role": "developer",
+                        "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                        1. Article form the EU directive to audit against.
+                        2. Notes from the audit.
+                        Reply with a coherent and easy to read summary of how requirements of this article are implemented based on the notes provided.
+                        When replying, follow the following rules:
+                        1. Do not repeat instructions.
+                        2. Do not repeat requirements.
+                        4. Use only the information provided in the notes, do not include any additional context.
+                        5. Maximum 200 words.
+                        6. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:".
+                        \n---\n
+                        Input 1 (article): \n---\n {article_title} {article_text} \n---\n
+                        Input 2 (Notes):  \n---\n {notes}""",
+                    }
+                    ]
+
+                    OpenAI_reply2 = openAI_processor(message1, selected_model)
+
+                    #part_2_response_AISummary.append(OpenAI_reply2)
+
+                part_2_response_AISummary.append(OpenAI_reply2)
+
+                if selection_observations:
+
+                    message2 = [
+                    {
+                        "role": "developer",
+                        "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                        1. Article form the EU directive to audit against.
+                        2. Notes from the audit.
+                        Reply with a a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
+                        Do not repeat instructions. Only use the information from notes relevant for each article. Do not provide implementation summary.
+                        \n---\n
+                        Input 1 (article): \n---\n {article_title} {article_text} \n---\n
+                        Input 2 (Notes):  \n---\n {notes}""",
+                    }
+                    ]
+
+                    OpenAI_reply3 = openAI_processor(message2, selected_model)
+
+                part_2_response_AIFindings.append(OpenAI_reply3)
 
 
-            message2 = [
-            {
-                "role": "developer",
-                "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
-                1. Article form the EU directive to audit against.
-                2. Notes from the audit.
-                Reply with a a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
-                Do not repeat instructions. Only use the information from notes relevant for each article. Do not provide implementation summary.
-                \n---\n
-                Input 1 (article): \n---\n {article_title} {article_text} \n---\n
-                Input 2 (Notes):  \n---\n {notes}""",
-            }
-            ]
+                pptx_temp_storage = [article_title, article_text, OpenAI_reply2, OpenAI_reply3]
+                pptx_generator_input.append(pptx_temp_storage)
 
-            OpenAI_reply3 = openAI_processor(message2, selected_model)
-            part_2_response_AIFindings.append(OpenAI_reply3)
-            #part_2_response_AIFindings.append(article_text)
+            part_2_response = pd.DataFrame()
+            part_2_response['Summary'] = part_2_response_AISummary
+            part_2_response['Potential findings'] = part_2_response_AIFindings
+            part_2_response.index = part_2_response_article
 
 
-            pptx_temp_storage = [article_title, article_text, OpenAI_reply2, OpenAI_reply3]
-            pptx_generator_input.append(pptx_temp_storage)
+            st.dataframe(part_2_response, height=1500, row_height=400)
 
-        part_2_response = pd.DataFrame()
-        part_2_response['Summary'] = part_2_response_AISummary
-        part_2_response['Potential findings'] = part_2_response_AIFindings
-        part_2_response.index = part_2_response_article
-
-
-        st.dataframe(part_2_response, height=1500, row_height=400)
-
-        st.download_button(
-            label="Download draft report",
-            data=prepare_download(pptx_generator_input),
-            file_name="temp-draft-report.pptx",
-            icon=":material/download:",
-        )
+            st.download_button(
+                label="Download draft report",
+                data=prepare_download(pptx_generator_input),
+                file_name="NIS2-generated-draft-report.pptx",
+                icon=":material/download:",
+            )
 
 else:
     st.write("Not yet implemented")
