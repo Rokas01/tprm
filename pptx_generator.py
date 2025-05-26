@@ -1,5 +1,8 @@
 from pptx import Presentation
 from pptx.util import Pt
+from io import BytesIO
+
+
 
 def apply_font(text_object):
     font = text_object.font
@@ -83,7 +86,11 @@ def create_presentation_report_findings(title_text, subtitle_text, requirementsA
 
     #prs.save(filename)
 
-    return prs
+    binary_output = BytesIO()
+    prs.save(binary_output) 
+
+    return binary_output.getvalue()
+
 
 #test_results = [["Article 21", "The measures referred to in paragraph 1 shall be based", "this is a summary", "not requested"], ["Article 22", "test text for the next article", "this is a summary", "not requested"]]
 
