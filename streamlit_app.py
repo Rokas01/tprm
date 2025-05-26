@@ -13,6 +13,14 @@ st.set_page_config(page_title="AI prototyping", layout="wide")
 
 st.title("📄 AI prototyping")
 
+def prepare_download(dict_to_use):
+
+    report = pptx_generator.create_presentation_report_findings("NIS2 assessment", "Draft report", dict_to_use, "temp-draft-report.pptx")
+
+    return report
+
+
+
 
 def openAI_processor(prompt, model_to_use):
 
@@ -307,10 +315,15 @@ elif add_selectbox=="NIS2 assessment support":
         part_2_response['Potential findings'] = part_2_response_AIFindings
         part_2_response.index = part_2_response_article
 
-        pptx_generator.create_presentation_report_findings("NIS2 assessment", "Draft report", pptx_generator_input)
 
         st.dataframe(part_2_response, height=1500, row_height=400)
 
+        st.download_button(
+            label="Download draft report",
+            data=prepare_download(pptx_generator_input),
+            file_name="temp-draft-report.pptx",
+            icon=":material/download:",
+        )
 
 else:
     st.write("Not yet implemented")

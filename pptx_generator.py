@@ -63,7 +63,7 @@ def add_slide(prs_object_input, layout_input, title_input):
     return slide
 
 
-def create_presentation_report_findings(title_text, subtitle_text, requirementsAndFindings):
+def create_presentation_report_findings(title_text, subtitle_text, requirementsAndFindings, filename):
 
     prs = Presentation()
     title_slide_layout = prs.slide_layouts[0]
@@ -81,9 +81,11 @@ def create_presentation_report_findings(title_text, subtitle_text, requirementsA
         add_slide(prs, bullet_slide_layout, requirement)
  
 
-    prs.save('test2.pptx')
+    #prs.save(filename)
 
-test_results = [["Article 21", "The measures referred to in paragraph 1 shall be based", "this is a summary", "not requested"], ["Article 22", "test text for the next article", "this is a summary", "not requested"]]
+    return prs
 
-create_presentation_report_findings("NIS2 compliance", "assessment report", test_results)
+#test_results = [["Article 21", "The measures referred to in paragraph 1 shall be based", "this is a summary", "not requested"], ["Article 22", "test text for the next article", "this is a summary", "not requested"]]
+
+#create_presentation_report_findings("NIS2 compliance", "assessment report", test_results)
 
