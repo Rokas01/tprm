@@ -5,6 +5,7 @@ import PyPDF2
 from openai import OpenAI
 import os
 import pandas as pd
+import pptx_generator
 
 # Show title and description.
 
@@ -242,6 +243,7 @@ elif add_selectbox=="NIS2 assessment support":
         part_2_response_article =[]
         part_2_response_AISummary =[]
         part_2_response_AIFindings = []
+        pptx_generator_input = []
 
         for file in os.listdir(directory):
             filename = os.fsdecode(file)
@@ -296,10 +298,16 @@ elif add_selectbox=="NIS2 assessment support":
             part_2_response_AIFindings.append(OpenAI_reply3)
             #part_2_response_AIFindings.append(article_text)
 
+
+            pptx_temp_storage = [article_title, article_text, OpenAI_reply2, OpenAI_reply3]
+            pptx_generator_input.append(pptx_temp_storage)
+
         part_2_response = pd.DataFrame()
         part_2_response['Summary'] = part_2_response_AISummary
         part_2_response['Potential findings'] = part_2_response_AIFindings
         part_2_response.index = part_2_response_article
+
+        pptx_generator.create_presentation_report_findings("NIS2 assessment", "Draft report", pptx_generator_input)
 
         st.dataframe(part_2_response, height=1500, row_height=400)
 
