@@ -345,9 +345,9 @@ elif add_selectbox=="NIS2 assessment support":
                         You need to write risk statements for the provided findings. When replying, follow these rules:
                         1. Do not repeat instructions. 
                         2. Only use the information from findings. 
-                        3. Do not discuss next steps, only write risk statements.
+                        3. Do not include follow-up questions or next steps, only write risk statements.
                         4. Reply with 100 words maximum for each risk.
-                        5. Apply good practice for writing IT risk statement.
+                        5. Apply good practice for writing IT risk statements by explaining why each risk is important.
                         \n---\n
                         Input 1 (article): \n---\n {article_title} {article_text} \n---\n
                         Audit findings:  \n---\n {OpenAI_reply3}""",
