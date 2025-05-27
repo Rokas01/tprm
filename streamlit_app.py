@@ -15,7 +15,7 @@ st.title("📄 AI prototyping")
 
 def prepare_download(dict_to_use, include_article=True):
 
-    report = pptx_generator.create_presentation_report_findings("NIS2 assessment", "Draft report", dict_to_use, "temp-draft-report.pptx", include_requirement_text=include_article)
+    report = pptx_generator.create_presentation_report_findings("NIS2 assessment", "Draft report", dict_to_use, include_requirement_text=include_article)
 
     return report
 
@@ -190,7 +190,8 @@ elif add_selectbox=="NIS2 assessment support":
     selection_applibability = st.checkbox("Applicability assessment")
     selection_implementation_summary = st.checkbox("Implementation summary")
     selection_observations = st.checkbox("Observations")
-    selection_risks = st.checkbox("Observations AND risks")   
+    selection_risks = st.checkbox("Risks (Important - observations MUST be selected)")
+    selection_applicability = st.checkbox("Include requirement text in responses")
 
     # Let the user upload a file via `st.file_uploader`.
     st.write("Enter basic information about the organization:")
@@ -214,7 +215,7 @@ elif add_selectbox=="NIS2 assessment support":
     OpenAI_reply1 = "applicability not requested"
     OpenAI_reply2 = "summary not requested"
     OpenAI_reply3 = "observations not requested"
-
+    OpenAI_reply4 = "risks not requested"
 
     # Ask the user for a question via `st.text_area`.
     notes = st.text_area(
@@ -264,13 +265,14 @@ elif add_selectbox=="NIS2 assessment support":
             part_2_response_article =[]
             part_2_response_AISummary =[]
             part_2_response_AIFindings = []
+            part2_response_AIRisks = []
             pptx_generator_input = []
 
             for file in os.listdir(directory):
                 filename = os.fsdecode(file)
 
                 NIS2 = open(os.path.join("NIS2-breakdown", filename),'r')
-                article_title = NIS2.readline()
+                article_title = NIS2.readline().rstrip()
                 article_text = NIS2.read()
                 NIS2.close()
 
@@ -311,7 +313,7 @@ elif add_selectbox=="NIS2 assessment support":
                         "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
                         1. Article form the EU directive to audit against.
                         2. Notes from the audit.
-                        Reply with a a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
+                        Reply with a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
                         Do not repeat instructions. Only use the information from notes relevant for each article. Do not provide implementation summary.
                         \n---\n
                         Input 1 (article): \n---\n {article_title} {article_text} \n---\n
@@ -323,19 +325,42 @@ elif add_selectbox=="NIS2 assessment support":
 
                 part_2_response_AIFindings.append(OpenAI_reply3)
 
+                if selection_risks:
 
-                pptx_temp_storage = [article_title, article_text, OpenAI_reply2, OpenAI_reply3]
+                    if selection_observations == False:
+                        st.warning('Observations MUST be selected!', icon="⚠️")
+
+                    message3 = [
+                    {
+                        "role": "developer",
+                        "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                        1. Article form the EU directive to audit against.
+                        2. Audit findings
+                        Reply with a list of risks related to the provdied findings. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
+                        Do not repeat instructions. Only use the information from findings. Do not discuss next steps, only mention risks. Reply with 100 words maximum.
+                        \n---\n
+                        Input 1 (article): \n---\n {article_title} {article_text} \n---\n
+                        Audit findings:  \n---\n {OpenAI_reply3}""",
+                    }
+                    ]
+
+                    OpenAI_reply4 = openAI_processor(message3, selected_model)
+
+                part2_response_AIRisks.append(OpenAI_reply4)
+
+
+                pptx_temp_storage = [article_title, article_text, OpenAI_reply2, OpenAI_reply3, OpenAI_reply4]
+                #pptx_temp_storage = [article_title, article_text, OpenAI_reply2, OpenAI_reply3]
                 pptx_generator_input.append(pptx_temp_storage)
 
             part_2_response = pd.DataFrame()
             part_2_response['Summary'] = part_2_response_AISummary
             part_2_response['Potential findings'] = part_2_response_AIFindings
+            part_2_response['Risks'] = part2_response_AIRisks    
             part_2_response.index = part_2_response_article
 
 
             st.dataframe(part_2_response, height=1500, row_height=400)
-
-            selection_applicability = st.checkbox("Include full article text in the report?")
 
             st.download_button(
                 label="Download draft report",

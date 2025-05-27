@@ -21,11 +21,13 @@ def add_slide(prs_object_input, layout_input, title_input, requirement_text=True
     requirement_text_from_call = title_input[1]
     summary_text_from_call = title_input[2]
     observation_text_from_call = title_input[3]
+    risks_text_from_call = title_input[3]
     
     slide = prs_object_input.slides.add_slide(layout_input)
-    slide.shapes.title.text = slide_heading_from_call
+    #slide.shapes.title.text = slide_heading_from_call
     title_para = slide.shapes.title.text_frame.paragraphs[0]
     title_para.font.size = Pt(26)
+    title_para.text = slide_heading_from_call
 
     shapes = slide.shapes
     body_shape = shapes.placeholders[1]
@@ -63,13 +65,29 @@ def add_slide(prs_object_input, layout_input, title_input, requirement_text=True
     p5.text = observation_text_from_call
     p5.font.size = Pt(9)
     p5.level = 1
+
+    p6 = tf.add_paragraph()
+    p6.text = "Risks"
+    p6.font.size = Pt(12)
+    p6.font.bold = True
+    p6.level = 0
+
+    p7 = tf.add_paragraph()
+    p7.text = risks_text_from_call
+    p7.font.size = Pt(9)
+    p7.level = 1
     
     return slide
 
 
 def create_presentation_report_findings(title_text, subtitle_text, requirementsAndFindings, include_requirement_text=True):
 
-    prs = Presentation()
+    #using template
+    path = 'template.pptx'
+    prs = Presentation(path)
+
+    #prs = Presentation()
+
     title_slide_layout = prs.slide_layouts[0]
     slide = prs.slides.add_slide(title_slide_layout)
     title = slide.shapes.title
