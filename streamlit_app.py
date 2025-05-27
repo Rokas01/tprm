@@ -314,7 +314,12 @@ elif add_selectbox=="NIS2 assessment support":
                         1. Article form the EU directive to audit against.
                         2. Notes from the audit.
                         Reply with a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
-                        Do not repeat instructions. Only use the information from notes relevant for each article. Do not provide implementation summary.
+                        When replying, follow the following rules:
+                        1. Do not repeat instructions. 
+                        2. Only use the information from notes relevant for each article. 
+                        3. Do not provide implementation summary. 
+                        4. Only include issues that are explicitly mentioned in the notes. Do not include requirements with no evidence.
+                        5. 100 words maximum per finding.
                         \n---\n
                         Input 1 (article): \n---\n {article_title} {article_text} \n---\n
                         Input 2 (Notes):  \n---\n {notes}""",
