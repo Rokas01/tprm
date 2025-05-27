@@ -287,7 +287,7 @@ elif add_selectbox=="NIS2 assessment support":
                         1. Article form the EU directive to audit against.
                         2. Notes from the audit.
                         Reply with a coherent and easy to read summary of how requirements of this article are implemented based on the notes provided.
-                        When replying, follow the following rules:
+                        When replying, follow these rules:
                         1. Do not repeat instructions.
                         2. Do not repeat requirements.
                         4. Use only the information provided in the notes, do not include any additional context.
@@ -314,12 +314,13 @@ elif add_selectbox=="NIS2 assessment support":
                         1. Article form the EU directive to audit against.
                         2. Notes from the audit.
                         Reply with a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
-                        When replying, follow the following rules:
+                        When replying, follow these  rules:
                         1. Do not repeat instructions. 
                         2. Only use the information from notes relevant for each article. 
                         3. Do not provide implementation summary. 
-                        4. Only include issues that are explicitly mentioned in the notes. Do not include requirements with no evidence.
-                        5. 100 words maximum per finding.
+                        4. Only include issues that are explicitly mentioned in the notes. 
+                        5. If the implementation is not mentioned in the notes, do not asume it is a finding.
+                        6. 100 words maximum per finding.
                         \n---\n
                         Input 1 (article): \n---\n {article_title} {article_text} \n---\n
                         Input 2 (Notes):  \n---\n {notes}""",
