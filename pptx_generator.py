@@ -14,7 +14,7 @@ def apply_font(text_object):
 
 
 
-def add_slide(prs_object_input, layout_input, title_input):
+def add_slide(prs_object_input, layout_input, title_input, requirement_text=True):
     """Return slide newly added to `prs` using `layout` and having `title`."""
 
     slide_heading_from_call = title_input[0]
@@ -31,15 +31,16 @@ def add_slide(prs_object_input, layout_input, title_input):
     body_shape = shapes.placeholders[1]
     tf = body_shape.text_frame
 
-    p0 = tf.add_paragraph()
-    p0.text = 'Requirement'
-    p0.font.size = Pt(12)
-    p0.font.bold = True
+    if requirement_text == True:
+        p0 = tf.add_paragraph()
+        p0.text = 'Requirement'
+        p0.font.size = Pt(12)
+        p0.font.bold = True
 
-    p1 = tf.add_paragraph()
-    p1.text = requirement_text_from_call
-    p1.font.size = Pt(9)
-    p1.level = 1
+        p1 = tf.add_paragraph()
+        p1.text = requirement_text_from_call
+        p1.font.size = Pt(9)
+        p1.level = 1
 
     p2 = tf.add_paragraph()
     p2.text = "Summary"
@@ -66,7 +67,7 @@ def add_slide(prs_object_input, layout_input, title_input):
     return slide
 
 
-def create_presentation_report_findings(title_text, subtitle_text, requirementsAndFindings, filename):
+def create_presentation_report_findings(title_text, subtitle_text, requirementsAndFindings, include_requirement_text=True):
 
     prs = Presentation()
     title_slide_layout = prs.slide_layouts[0]
@@ -81,7 +82,7 @@ def create_presentation_report_findings(title_text, subtitle_text, requirementsA
 
         bullet_slide_layout = prs.slide_layouts[1]
 
-        add_slide(prs, bullet_slide_layout, requirement)
+        add_slide(prs, bullet_slide_layout, requirement, requirement_text=include_requirement_text)
  
 
     #prs.save(filename)

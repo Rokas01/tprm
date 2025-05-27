@@ -13,12 +13,11 @@ st.set_page_config(page_title="AI prototyping", layout="wide")
 
 st.title("📄 AI prototyping")
 
-def prepare_download(dict_to_use):
+def prepare_download(dict_to_use, include_article=True):
 
-    report = pptx_generator.create_presentation_report_findings("NIS2 assessment", "Draft report", dict_to_use, "temp-draft-report.pptx")
+    report = pptx_generator.create_presentation_report_findings("NIS2 assessment", "Draft report", dict_to_use, "temp-draft-report.pptx", include_requirement_text=include_article)
 
     return report
-
 
 
 
@@ -336,9 +335,11 @@ elif add_selectbox=="NIS2 assessment support":
 
             st.dataframe(part_2_response, height=1500, row_height=400)
 
+            selection_applicability = st.checkbox("Include full article text in the report?")
+
             st.download_button(
                 label="Download draft report",
-                data=prepare_download(pptx_generator_input),
+                data=prepare_download(pptx_generator_input, include_article=selection_applicability),
                 file_name="NIS2-generated-draft-report.pptx",
                 icon=":material/download:",
             )
