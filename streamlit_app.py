@@ -314,7 +314,7 @@ elif add_selectbox=="NIS2 assessment support":
                         1. Article form the EU directive to audit against.
                         2. Notes from the audit.
                         Reply with a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
-                        When replying, follow these  rules:
+                        When replying, follow these rules:
                         1. Do not repeat instructions. 
                         2. Only use the information from notes relevant for each article. 
                         3. Do not provide implementation summary. 
@@ -342,8 +342,12 @@ elif add_selectbox=="NIS2 assessment support":
                         "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
                         1. Article form the EU directive to audit against.
                         2. Audit findings
-                        Reply with a list of risks related to the provdied findings. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
-                        Do not repeat instructions. Only use the information from findings. Do not discuss next steps, only mention risks. Reply with 100 words maximum.
+                        You need to write risk statements for the provided findings. When replying, follow these rules:
+                        1. Do not repeat instructions. 
+                        2. Only use the information from findings. 
+                        3. Do not discuss next steps, only write risk statements.
+                        4. Reply with 100 words maximum for each risk.
+                        5. Apply good practice for writing IT risk statement.
                         \n---\n
                         Input 1 (article): \n---\n {article_title} {article_text} \n---\n
                         Audit findings:  \n---\n {OpenAI_reply3}""",
