@@ -193,6 +193,11 @@ elif add_selectbox=="NIS2 assessment support":
     selection_risks = st.checkbox("Risks (Important - observations MUST be selected)")
     selection_applicability = st.checkbox("Include requirement text in responses")
 
+
+    if selection_observations == False and selection_risks == True:
+        st.warning('Observations MUST be selected!', icon="⚠️")
+
+
     # Let the user upload a file via `st.file_uploader`.
     st.write("Enter basic information about the organization:")
     Industry = st.text_input(
@@ -319,7 +324,7 @@ elif add_selectbox=="NIS2 assessment support":
                         2. Only use the information from notes relevant for each article. 
                         3. Do not provide implementation summary. 
                         4. Only include issues that are explicitly mentioned in the notes. 
-                        5. If the implementation is not mentioned in the notes, do not asume it is a finding.
+                        5. If the implementation is not mentioned or inforamtion insufffienct in the notes, do not asume it is a finding, reply with "more information needed to conclude".
                         6. 100 words maximum per finding.
                         \n---\n
                         Input 1 (article): \n---\n {article_title} {article_text} \n---\n
@@ -333,9 +338,6 @@ elif add_selectbox=="NIS2 assessment support":
 
                 if selection_risks:
 
-                    if selection_observations == False:
-                        st.warning('Observations MUST be selected!', icon="⚠️")
-
                     message3 = [
                     {
                         "role": "developer",
@@ -343,7 +345,8 @@ elif add_selectbox=="NIS2 assessment support":
                         1. Article form the EU directive to audit against.
                         2. Audit findings
                         You need to write risk statements for the provided findings. When replying, follow these rules:
-                        1. Do not repeat instructions. 
+                        1. Do not repeat instructions.
+                        2. If the finding only references the fact that the information is missing or insufficent reply with "No specific risks - more infortmation needed".
                         2. Only use the information from findings. 
                         3. Do not include follow-up questions or next steps, only write risk statements.
                         4. Reply with 100 words maximum for each risk.

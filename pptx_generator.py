@@ -21,7 +21,7 @@ def add_slide(prs_object_input, layout_input, title_input, requirement_text=True
     requirement_text_from_call = title_input[1]
     summary_text_from_call = title_input[2]
     observation_text_from_call = title_input[3]
-    risks_text_from_call = title_input[3]
+    risks_text_from_call = title_input[4]
     
     slide = prs_object_input.slides.add_slide(layout_input)
     #slide.shapes.title.text = slide_heading_from_call
