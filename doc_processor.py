@@ -32,25 +32,27 @@ def read_document(directory, file, delimeter1, delimeter2, strip_new_line = Fals
             print(text)
 
 
-def read_document_w_categories(directory, file, delimeter1, delimeter2, delimeter3, strip_new_line = True):
-
+def read_document_w_categories(directory, file, delims=[], strip_new_line = True, char_to_strip = ""):
     with open(os.path.join(directory, file),"r") as f:
-        lines = f.read().split(delimeter1)
+        lines = f.read().split('\n')
 
     d = defaultdict(list)
 
     for i in lines:
 
-        delimiters =[delimeter2, delimeter3]
-        regex_pattern = '|'.join(map(re.escape, delimiters))
+        regex_pattern = '|'.join(map(re.escape, delims))
+
 
         article = re.split(regex_pattern, i)
 
-        category = article[0].strip('\n')
-        title = article[1].strip('\n')
-        text = article[2].strip('\n')
+        split_text = []
 
-        d[category].append([title, text])
+        category = article[0].strip('\n')
+
+        for item in article[1:]:
+            split_text.append(item.strip(char_to_strip))
+
+        d[category].append(split_text)
 
 
     return d
@@ -60,7 +62,18 @@ def read_document_w_categories(directory, file, delimeter1, delimeter2, delimete
 
 #read_document("ISO27k", "AnnexA.txt", "#", "£", strip_new_line = True)
 
-#test = read_document_w_categories("ISO27k", "AnnexA.txt", "#", "£", "@", strip_new_line = True)
+annexA = read_document_w_categories("ISO27k", "AnnexA.txt", delims=["£", "@"], strip_new_line = True, char_to_strip="#")
+Guidance = read_document_w_categories("ISO27k", "Guidance.txt", delims=["#"], strip_new_line = True, char_to_strip="@")
+
+for i in annexA:
+    
+    print(annexA[i][0][0])
+    print(Guidance[annexA[i][0][0]][0][0])
+
+
+
+#print(test["8.34 Protection of information systems during audit testing."])
+
 
 #selected_category = test["Cryptography"]
 

@@ -14,7 +14,8 @@ st.set_page_config(page_title="AI prototyping", layout="wide")
 
 st.title("📄 AI prototyping")
 
-selected_model ="o4-mini"
+#selected_model ="o4-mini"
+selected_model ="o3"
 
 def prepare_download(dict_to_use, include_article=True):
 
@@ -421,6 +422,7 @@ elif add_selectbox=="ISO27k assessment support":
     selection_observations = st.checkbox("Observations")
     selection_risks = st.checkbox("Risks (Important - observations MUST be selected)")
     selection_applicability = st.checkbox("Include requirement text in responses")
+    selection_27002 = st.checkbox("Include ISO 27002 when drafting observations?")
 
     # Collecting basic info about the organization
     st.write("Enter basic information about the organization:")
@@ -451,14 +453,13 @@ elif add_selectbox=="ISO27k assessment support":
         "Meeting notes:",
         placeholder="Enter your notes here")
     
-    st.write(f" **Important: ** the assessment is only performed against articles 20, 21, 23 and 24 + applicability check against art.3 and art.26.")
-
 
     if st.button("Process"):
 
         st.write(f" **Assessment summary**")
 
-        full_anenx_A = doc_processor.read_document_w_categories("ISO27k", "AnnexA.txt", "#", "£", "@", strip_new_line = True)
+        full_anenx_A = doc_processor.read_document_w_categories("ISO27k", "AnnexA.txt", delims=["£", "@"], strip_new_line = True,  char_to_strip="#")
+        guidance = doc_processor.read_document_w_categories("ISO27k", "Guidance.txt", delims=["#"], strip_new_line = True, char_to_strip="@") #new
 
         selected_category = full_anenx_A[control_group]
 
@@ -472,6 +473,7 @@ elif add_selectbox=="ISO27k assessment support":
 
             article_title = file[0]
             article_text = file[1]
+            guidance_text = guidance[article_title][0][0]
 
             part_2_response_article.append(article_title)
 
@@ -501,7 +503,33 @@ elif add_selectbox=="ISO27k assessment support":
 
             part_2_response_AISummary.append(LLM_reply_summary)
 
-            if selection_observations:
+            if selection_observations and selection_27002: #with ISO 27002
+
+                message2 = [
+                {
+                    "role": "developer",
+                    "content": f"""You are a cybersecurity audit assistant. I will provide with 3 inputs:
+                    1. ISO 27001:2022 requirement to audit against.
+                    2. ISO 27002:2022 guidance how to implement ISO 27001.
+                    2. Notes from the audit.
+                    Reply with a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
+                    When replying, follow these rules:
+                    1. Do not repeat instructions. 
+                    2. Only use the information from notes relevant for each requirement. 
+                    3. Do not provide implementation summary. 
+                    4. Only include issues that are explicitly mentioned in the notes. 
+                    5. If the implementation is not mentioned or inforamtion insufffienct in the notes, do not asume it is a finding, reply with "more information needed to conclude".
+                    6. 200 words maximum per finding.
+                    \n---\n
+                    Input 1 (Requirement): \n---\n {article_title} {article_text} \n---\n
+                    Input 2 (Guidance):  \n---\n {guidance_text} \n---\n
+                    Input 2 (Notes):  \n---\n {notes}""",
+                }
+                ]
+
+                LLM_reply_findings = openAI_processor(message2, selected_model)
+
+            else: #without ISO27002
 
                 message2 = [
                 {
@@ -524,6 +552,9 @@ elif add_selectbox=="ISO27k assessment support":
                 ]
 
                 LLM_reply_findings = openAI_processor(message2, selected_model)
+
+                
+
 
             part_2_response_AIFindings.append(LLM_reply_findings)
 
