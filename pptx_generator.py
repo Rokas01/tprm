@@ -80,11 +80,16 @@ def add_slide(prs_object_input, layout_input, title_input, requirement_text=True
     return slide
 
 
-def create_presentation_report_findings(title_text, subtitle_text, requirementsAndFindings, include_requirement_text=True):
+def create_presentation_report_findings(title_text, subtitle_text, requirementsAndFindings, include_requirement_text=True, custom_template=None):
 
-    #using template
-    path = 'template.pptx'
-    prs = Presentation(path)
+    if custom_template is not None:
+
+        prs = Presentation(custom_template)
+
+    else:
+
+        path = 'template.pptx'
+        prs = Presentation(path)
 
     #prs = Presentation()
 

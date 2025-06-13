@@ -17,12 +17,11 @@ st.title("📄 AI prototyping")
 selected_model ="o4-mini"
 #selected_model ="o3"
 
-def prepare_download(dict_to_use, include_article=True):
+def prepare_download(dict_to_use, include_article=True, presentation_title="NIS2 asessment"):
 
-    report = pptx_generator.create_presentation_report_findings("NIS2 assessment", "Draft report", dict_to_use, include_requirement_text=include_article)
+    report = pptx_generator.create_presentation_report_findings(presentation_title, "Draft report", dict_to_use, include_requirement_text=include_article)
 
     return report
-
 
 
 def openAI_processor(prompt, model_to_use):
@@ -39,14 +38,44 @@ def openAI_processor(prompt, model_to_use):
 
     return content
 
-def add_assessment_checkboxes():
 
-    st.write("Pelase select options:")
-    selection_applibability = st.checkbox("Applicability assessment")
-    selection_implementation_summary = st.checkbox("Implementation summary")
-    selection_observations = st.checkbox("Observations")
-    selection_risks = st.checkbox("Risks (Important - observations MUST be selected)")
-    selection_applicability = st.checkbox("Include requirement text in responses")
+def add_assessment_checkboxes(streamlit_object):
+
+    streamlit_object.write("Pelase select options:")
+    selection_implementation_summary = streamlit_object.checkbox("Implementation summary")
+    selection_observations = streamlit_object.checkbox("Observations")
+    selection_risks = streamlit_object.checkbox("Risks (Important - observations MUST be selected)")
+    selection_applicability = streamlit_object.checkbox("Include requirement text in responses?")
+    selection_27002 = streamlit_object.checkbox("Include ISO 27002 guidance when drafting observations?")
+    streamlit_object.write("NOTE: the assessment is ONLY perofrmed agaisnt ISO27001 Annex A and (optional) ISO27002")
+
+
+def add_ISMS_area_selector(stramlit_object):
+
+    object_to_return = stramlit_object.selectbox(
+    "Please select area under review:",
+    ("Information & Communications Security",
+    "Organization of Information Security",
+    "Asset Management",
+    "Access Control",
+    "Supplier Relationships",
+    "Information Security Incident Management",
+    "Business Continuity Management",
+    "Compliance",
+    "Cryptography",
+    "Human Resource Security",
+    "Operations Security",
+    "Physical and Environmental Security",
+    "System Acquisition, Development and Maintenance"),
+    )
+
+    return object_to_return
+
+def template_uploader():
+
+    return 0
+
+
 
 def text_preprocessing():
 
@@ -58,16 +87,18 @@ def text_preprocessing():
     part2_response_AIRisks = []
     pptx_generator_input = []
 
-
     return 0
-
-
 
 add_selectbox = st.sidebar.selectbox(
     "Please select use-case",
     ("Document reviewer", "Duplicate checker", 
-     "Discount validation", "NIS2 assessment support", "ISO27k assessment support")
+     "Discount validation", "NIS2 assessment support", "ISO27k assessment support", "CRA assessment support")
 )
+
+presentation_template = st.sidebar.file_uploader(
+    "Upload report template (pptx or ppt)", accept_multiple_files=False, type=[".pptx", ".ppt"]
+)
+
 
 # Using "with" notation
 with st.sidebar:
@@ -359,7 +390,7 @@ elif add_selectbox=="NIS2 assessment support":
                         2. Audit findings
                         You need to write risk statements for the provided findings. When replying, follow these rules:
                         1. Do not repeat instructions.
-                        2. If the finding only references the fact that the information is missing or insufficent reply with "No specific risks - more infortmation needed".
+                        2. If the finding only references the fact that the information is missing or insufficent reply with "No specific risks - more information needed".
                         2. Only use the information from findings. 
                         3. Do not include follow-up questions or next steps, only write risk statements.
                         4. Reply with 100 words maximum for each risk.
@@ -399,31 +430,16 @@ elif add_selectbox=="NIS2 assessment support":
 #=================================
 elif add_selectbox=="ISO27k assessment support":
 
-    control_group = st.selectbox(
-    "Please select area under review:",
-    ("Information & Communications Security",
-    "Organization of Information Security",
-    "Asset Management",
-    "Access Control",
-    "Supplier Relationships",
-    "Information Security Incident Management",
-    "Business Continuity Management",
-    "Compliance",
-    "Cryptography",
-    "Human Resource Security",
-    "Operations Security",
-    "Physical and Environmental Security",
-    "System Acquisition, Development and Maintenance"),
-    )
-
-    # Intiailizing checkboxes
+    control_group = add_ISMS_area_selector(st)
+    
+    # Intializing checkboxes
     st.write("Pelase select options:")
     selection_implementation_summary = st.checkbox("Implementation summary")
     selection_observations = st.checkbox("Observations")
     selection_risks = st.checkbox("Risks (Important - observations MUST be selected)")
     selection_applicability = st.checkbox("Include requirement text in responses?")
     selection_27002 = st.checkbox("Include ISO 27002 guidance when drafting observations?")
-    st.write("NOTE: the assessment is ONLY perofrmed agaisnt ISO27001 Annex A and (optinal) ISO27002")
+    st.write("NOTE: the assessment is ONLY perofrmed agaisnt ISO27001 Annex A and (optional) ISO27002")
 
     # Collecting basic info about the organization
     st.write("Enter basic information about the organization:")
@@ -595,12 +611,181 @@ elif add_selectbox=="ISO27k assessment support":
 
         st.download_button(
             label="Download draft report",
-            data=prepare_download(pptx_generator_input, include_article=selection_applicability),
+            data=prepare_download(pptx_generator_input, include_article=selection_applicability, presentation_title="ISO 27001:2022 annex A asessment"),
             file_name="ISMS-generated-draft-report.pptx",
             icon=":material/download:",
             key=2
         )
 
+
+#=================================
+#CRA assessment support
+#=================================
+elif add_selectbox=="CRA assessment support":
+
+    control_group = st.selectbox(
+    "Please select area under review:",
+    ("Article 14",
+    "Annex I part II")
+    )
+
+    # Intializing checkboxes
+    st.write("Pelase select options:")
+    selection_implementation_summary = st.checkbox("Implementation summary")
+    selection_observations = st.checkbox("Observations")
+    selection_risks = st.checkbox("Risks (Important - observations MUST be selected)")
+    selection_applicability = st.checkbox("Include requirement text in responses?")
+
+    # Collecting basic info about the organization
+    st.write("Enter basic information about the organization:")
+    Industry = st.text_input(
+    "Industry:",
+    placeholder="....")
+
+    HQ_location = st.text_input(
+    "HQ location:",
+    placeholder="Enter country of HQ")
+    
+    No_of_sites = st.text_input(
+    "No of sites operating under the same ISMS:",
+    placeholder="Enter the number of sites")
+
+    Locations_of_sites = st.text_input(
+    "Locations of sites in-scope for this assessment:",
+    placeholder="Enter locations (countries only) of all sites (e.g. Germany, Austria, Italy)")
+    
+    # Initializing default responses
+    LLM_reply_summary = "summary not requested"
+    LLM_reply_findings = "observations not requested"
+    LLM_reply_risks = "risks not requested"
+
+    # Text field to input notes
+    notes = st.text_area(
+        "Meeting notes:",
+        placeholder="Enter your notes here")
+    
+
+    if st.button("Process"):
+
+        st.write(f" **Assessment summary**")
+
+        full_CPA_text = doc_processor.read_document_w_categories("CPA", "reg-text.txt", delims=["#","£","@"], strip_new_line = True)
+   
+        selected_category = full_CPA_text[control_group]
+
+        part_2_response_article =[]
+        part_2_response_AISummary =[]
+        part_2_response_AIFindings = []
+        part2_response_AIRisks = []
+        pptx_generator_input = []
+
+        for file in selected_category:
+
+            article_title = file[0]
+            article_text = file[1]
+            guidance_text = file[2]
+
+            part_2_response_article.append(article_title)
+
+            if selection_implementation_summary:
+
+                message1 = [
+                {
+                    "role": "developer",
+                    "content": f"""You are a cybersecurity audit assistant. I will provide with 3 inputs:
+                    1. Requirement of the EU regulation 2024/2847 (CPA) to audit against.
+                    2. Notes from the audit.
+                    3. Guidance on how the requirement should be implemented.
+                    Reply with a short and formal summary of how the requirement is implemented based on the notes provided.
+                    When replying, follow these rules:
+                    1. Do not repeat instructions.
+                    2. Do not repeat requirements or guidance.
+                    4. Use only the information provided in the notes, relevant for this requirement, do not include any additional context.
+                    5. Maximum 200 words.
+                    6. Do not use bullet points, write as a one paragraph.
+                    7. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:".
+                    \n---\n
+                    Input 1 (article): \n---\n {article_title} {article_text} \n---\n
+                    Input 2 (guidance): \n---\n {guidance_text}
+                    Input 3 (Notes):  \n---\n {notes}""",
+                }
+                ]
+
+                LLM_reply_summary = openAI_processor(message1, selected_model)
+
+            part_2_response_AISummary.append(LLM_reply_summary)
+
+            if selection_observations:
+
+                message2 = [
+                {
+                    "role": "developer",
+                    "content": f"""You are a cybersecurity audit assistant. I will provide with 3 inputs:
+                    1. Requirement of the EU regulation 2024/2847 (CPA) to audit against.
+                    2. Notes from the audit.
+                    3. Guidance on how the requirement should be implemented.
+                    Reply with a list of potential findings including citations of requirements (not guidance). Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
+                    When replying, follow these rules:
+                    1. Do not repeat instructions. 
+                    2. Only use the information from notes relevant for each requirement. 
+                    3. Do not provide implementation summary. 
+                    4. Only include issues that are explicitly mentioned in the notes. 
+                    5. If the implementation is not mentioned or inforamtion insufffienct in the notes, do not asume it is a finding, reply with "more information needed to conclude".
+                    6. 200 words maximum per finding.
+                    \n---\n
+                    Input 1 (Requirement): \n---\n {article_title} {article_text} \n---\n
+                    Input 2 (Guidance):  \n---\n {guidance_text} \n---\n
+                    Input 2 (Notes):  \n---\n {notes}""",
+                }
+                ]
+
+                LLM_reply_findings = openAI_processor(message2, selected_model)
+                
+            part_2_response_AIFindings.append(LLM_reply_findings)
+
+            if selection_risks:
+
+                message3 = [
+                {
+                    "role": "developer",
+                    "content": f"""You are a cybersecurity audit assistant. I will provide with 3 inputs:
+                    1. Requirement of the EU regulation 2024/2847 (CPA) to audit against.
+                    2. Audit findings
+                    You need to write risk statements for the provided findings. When replying, follow these rules:
+                    1. Do not repeat instructions.
+                    2. If the finding only references the fact that the information is missing or insufficent reply with "No specific risks - more infortmation needed".
+                    2. Only use the information from findings. 
+                    3. Do not include follow-up questions or next steps, only write risk statements.
+                    4. Reply with 100 words maximum for each risk.
+                    5. Apply good practice for writing IT risk statements by explaining why each risk is important.
+                    \n---\n
+                    Input 1 (requirement): \n---\n {article_title} {article_text} \n---\n
+                    Audit findings:  \n---\n {LLM_reply_findings}""",
+                }
+                ]
+
+                LLM_reply_risks = openAI_processor(message3, selected_model)
+
+            part2_response_AIRisks.append(LLM_reply_risks)
+
+            pptx_temp_storage = [article_title, article_text, LLM_reply_summary, LLM_reply_findings, LLM_reply_risks]
+            pptx_generator_input.append(pptx_temp_storage)
+
+        part_2_response = pd.DataFrame()
+        part_2_response['Summary'] = part_2_response_AISummary
+        part_2_response['Potential findings'] = part_2_response_AIFindings
+        part_2_response['Risks'] = part2_response_AIRisks    
+        part_2_response.index = part_2_response_article
+
+        st.dataframe(part_2_response, height=1500, row_height=400)
+
+        st.download_button(
+            label="Download draft report",
+            data=prepare_download(pptx_generator_input, include_article=selection_applicability, presentation_title="ISO 27001:2022 annex A asessment"),
+            file_name="ISMS-generated-draft-report.pptx",
+            icon=":material/download:",
+            key=2                                                           
+        )
 
 else:
     st.write("Not yet implemented")

@@ -42,7 +42,6 @@ def read_document_w_categories(directory, file, delims=[], strip_new_line = True
 
         regex_pattern = '|'.join(map(re.escape, delims))
 
-
         article = re.split(regex_pattern, i)
 
         split_text = []
@@ -62,13 +61,15 @@ def read_document_w_categories(directory, file, delims=[], strip_new_line = True
 
 #read_document("ISO27k", "AnnexA.txt", "#", "£", strip_new_line = True)
 
-annexA = read_document_w_categories("ISO27k", "AnnexA.txt", delims=["£", "@"], strip_new_line = True, char_to_strip="#")
-Guidance = read_document_w_categories("ISO27k", "Guidance.txt", delims=["#"], strip_new_line = True, char_to_strip="@")
+#annexA = read_document_w_categories("ISO27k", "AnnexA.txt", delims=["£", "@"], strip_new_line = True, char_to_strip="#")
+#Guidance = read_document_w_categories("ISO27k", "Guidance.txt", delims=["#"], strip_new_line = True, char_to_strip="@")
 
-for i in annexA:
-    
-    print(annexA[i][0][0])
-    print(Guidance[annexA[i][0][0]][0][0])
+#CRA = read_document_w_categories("CRA", "reg-text.txt", delims=["#", "£", "@"], strip_new_line = True)
+
+
+#print(annexA['Information & Communications Security'][0])
+#print(Guidance[annexA['Information & Communications Security'][0][0]][0][0])
+
 
 
 
