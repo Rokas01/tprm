@@ -693,7 +693,7 @@ elif add_selectbox=="CRA assessment support":
                 {
                     "role": "developer",
                     "content": f"""You are a cybersecurity audit assistant. I will provide with 3 inputs:
-                    1. Requirement of the EU regulation 2024/2847 (CPA) to audit against.
+                    1. Requirement of the EU regulation 2024/2847 (CPRA) to audit against.
                     2. Notes from the audit.
                     3. Guidance on how the requirement should be implemented.
                     Reply with a short and formal summary of how the requirement is implemented based on the notes provided.
@@ -721,7 +721,7 @@ elif add_selectbox=="CRA assessment support":
                 {
                     "role": "developer",
                     "content": f"""You are a cybersecurity audit assistant. I will provide with 3 inputs:
-                    1. Requirement of the EU regulation 2024/2847 (CPA) to audit against.
+                    1. Requirement of the EU regulation 2024/2847 (CRA) to audit against.
                     2. Notes from the audit.
                     3. Guidance on how the requirement should be implemented.
                     Reply with a list of potential findings including citations of requirements (not guidance). Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
@@ -749,7 +749,7 @@ elif add_selectbox=="CRA assessment support":
                 {
                     "role": "developer",
                     "content": f"""You are a cybersecurity audit assistant. I will provide with 3 inputs:
-                    1. Requirement of the EU regulation 2024/2847 (CPA) to audit against.
+                    1. Requirement of the EU regulation 2024/2847 (CRA) to audit against.
                     2. Audit findings
                     You need to write risk statements for the provided findings. When replying, follow these rules:
                     1. Do not repeat instructions.
@@ -781,7 +781,7 @@ elif add_selectbox=="CRA assessment support":
 
         st.download_button(
             label="Download draft report",
-            data=prepare_download(pptx_generator_input, include_article=selection_applicability, presentation_title="ISO 27001:2022 annex A asessment"),
+            data=prepare_download(pptx_generator_input, include_article=selection_applicability, presentation_title="EU regulation 2024/2847 (CRA) asessment"),
             file_name="CRA-generated-draft-report.pptx",
             icon=":material/download:",
             key=2                                                           
