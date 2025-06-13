@@ -782,7 +782,7 @@ elif add_selectbox=="CRA assessment support":
         st.download_button(
             label="Download draft report",
             data=prepare_download(pptx_generator_input, include_article=selection_applicability, presentation_title="ISO 27001:2022 annex A asessment"),
-            file_name="ISMS-generated-draft-report.pptx",
+            file_name="CRA-generated-draft-report.pptx",
             icon=":material/download:",
             key=2                                                           
         )
