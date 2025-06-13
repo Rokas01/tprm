@@ -14,8 +14,8 @@ st.set_page_config(page_title="AI prototyping", layout="wide")
 
 st.title("📄 AI prototyping")
 
-#selected_model ="o4-mini"
-selected_model ="o3"
+selected_model ="o4-mini"
+#selected_model ="o3"
 
 def prepare_download(dict_to_use, include_article=True):
 
@@ -421,8 +421,9 @@ elif add_selectbox=="ISO27k assessment support":
     selection_implementation_summary = st.checkbox("Implementation summary")
     selection_observations = st.checkbox("Observations")
     selection_risks = st.checkbox("Risks (Important - observations MUST be selected)")
-    selection_applicability = st.checkbox("Include requirement text in responses")
-    selection_27002 = st.checkbox("Include ISO 27002 when drafting observations?")
+    selection_applicability = st.checkbox("Include requirement text in responses?")
+    selection_27002 = st.checkbox("Include ISO 27002 guidance when drafting observations?")
+    st.write("NOTE: the assessment is ONLY perofrmed agaisnt ISO27001 Annex A and (optinal) ISO27002")
 
     # Collecting basic info about the organization
     st.write("Enter basic information about the organization:")
@@ -439,7 +440,7 @@ elif add_selectbox=="ISO27k assessment support":
     placeholder="Enter the number of sites")
 
     Locations_of_sites = st.text_input(
-    "Locations of manufacturing sites in-scope for this assessment:",
+    "Locations of sites in-scope for this assessment:",
     placeholder="Enter locations (countries only) of all sites (e.g. Germany, Austria, Italy)")
     
     # Initializing default responses
@@ -510,7 +511,7 @@ elif add_selectbox=="ISO27k assessment support":
                     "role": "developer",
                     "content": f"""You are a cybersecurity audit assistant. I will provide with 3 inputs:
                     1. ISO 27001:2022 requirement to audit against.
-                    2. ISO 27002:2022 guidance how to implement ISO 27001.
+                    2. ISO 27002:2022 guidance on how to implement ISO 27001:2022.
                     2. Notes from the audit.
                     Reply with a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
                     When replying, follow these rules:
@@ -554,8 +555,6 @@ elif add_selectbox=="ISO27k assessment support":
                 LLM_reply_findings = openAI_processor(message2, selected_model)
 
                 
-
-
             part_2_response_AIFindings.append(LLM_reply_findings)
 
             if selection_risks:
