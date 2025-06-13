@@ -669,7 +669,7 @@ elif add_selectbox=="CRA assessment support":
 
         st.write(f" **Assessment summary**")
 
-        full_CPA_text = doc_processor.read_document_w_categories("CPA", "reg-text.txt", delims=["#","£","@"], strip_new_line = True)
+        full_CPA_text = doc_processor.read_document_w_categories("CRA", "reg-text.txt", delims=["#","£","@"], strip_new_line = True)
    
         selected_category = full_CPA_text[control_group]
 
