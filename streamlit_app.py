@@ -700,7 +700,7 @@ elif add_selectbox=="CRA assessment support":
                     When replying, follow these rules:
                     1. Do not repeat instructions.
                     2. Do not repeat requirements or guidance.
-                    4. Use only the information provided in the notes, relevant for this requirement, do not include any additional context.
+                    4. Only include the notes relevant for this requirement in the summary. Do not include any additional context. Do not include irrelevant notes.
                     5. Maximum 200 words.
                     6. Do not use bullet points, write as a one paragraph.
                     7. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:".
