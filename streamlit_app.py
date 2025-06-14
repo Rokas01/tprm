@@ -728,6 +728,8 @@ elif add_selectbox=="CRA assessment support":
                     2. If any reporting or notifications are needed, does the company have reports, dashboards, approved communication channels, and protocols?
                     3. Has the company identified the authorities it needs to communicate with and does it have access to the tools for that?
                     4. Does the company collect, store, and retain sufficient data to meet its obligations?
+                    5. Does the company have a methodology to assess and rate risks associated with related processes?
+                    6. Are there controls in place to ensure that all assets are identified and included?
                     When replying, follow these rules:
                     1. Do not repeat instructions. 
                     2. Only use the information from notes relevant for each requirement. 
