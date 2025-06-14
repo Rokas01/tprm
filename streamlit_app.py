@@ -718,18 +718,12 @@ elif add_selectbox=="CRA assessment support":
                 message2 = [
                 {
                     "role": "developer",
-                    "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                    "content": f"""You are a cybersecurity audit assistant. I will provide with 4 inputs:
                     1. Requirement of the EU regulation 2024/2847 (Cyber Resilience Act) to audit against.
-                    2. General information about the company being audited.
-                    3. Notes from the audit.
+                    2. Audit guidance.
+                    3. General information about the company being audited.
+                    4. Notes from the audit.
                     Review notes and reply with a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
-                    When evaluating consider the following:
-                    1. Does the company have documented roles, responsibilities, and processes to meet its obligations?
-                    2. If any reporting or notifications are needed, does the company have reports, dashboards, approved communication channels, and protocols?
-                    3. Has the company identified the authorities it needs to communicate with and does it have access to the tools for that?
-                    4. Does the company collect, store, and retain sufficient data to meet its obligations?
-                    5. Does the company have a methodology to assess and rate risks associated with related processes?
-                    6. Are there controls in place to ensure that all assets are identified and included?
                     When replying, follow these rules:
                     1. Do not repeat instructions. 
                     2. Only use the information from notes relevant for each requirement. 
@@ -739,7 +733,8 @@ elif add_selectbox=="CRA assessment support":
                     6. 200 words maximum per finding.
                     \n---\n
                     Input 1 (Requirement): \n---\n {article_title} {article_text} \n---\n
-                    Input 3 (Information about the company being audited): Oeprating in {Industry} industry, headquarters in {HQ_location} with {No_of_sites} of remote sites in {Locations_of_sites}  \n---\n
+                    Input 2 (audit guidance): \n---\n {guidance_text} \n---\n
+                    Input 3 (Information about the company being audited): Operating in {Industry} industry, headquarters in {HQ_location} with {No_of_sites} of remote sites in {Locations_of_sites}  \n---\n
                     Input 2 (Notes):  \n---\n {notes}""",
                 }
                 ]
