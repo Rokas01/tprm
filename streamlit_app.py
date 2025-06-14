@@ -692,10 +692,9 @@ elif add_selectbox=="CRA assessment support":
                 message1 = [
                 {
                     "role": "developer",
-                    "content": f"""You are a cybersecurity audit assistant. I will provide with 3 inputs:
-                    1. Requirement of the EU regulation 2024/2847 (CPRA) to audit against.
+                    "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                    1. Requirement of the EU regulation 2024/2847 (Cyber Resilience Act) to audit against.
                     2. Notes from the audit.
-                    3. Guidance on how the requirement should be implemented.
                     Reply with a short and formal summary of how the requirement is implemented based on the notes provided.
                     When replying, follow these rules:
                     1. Do not repeat instructions.
@@ -706,8 +705,7 @@ elif add_selectbox=="CRA assessment support":
                     7. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:".
                     \n---\n
                     Input 1 (article): \n---\n {article_title} {article_text} \n---\n
-                    Input 2 (guidance): \n---\n {guidance_text}
-                    Input 3 (Notes):  \n---\n {notes}""",
+                    Input 2 (Notes):  \n---\n {notes}""",
                 }
                 ]
 
@@ -720,21 +718,26 @@ elif add_selectbox=="CRA assessment support":
                 message2 = [
                 {
                     "role": "developer",
-                    "content": f"""You are a cybersecurity audit assistant. I will provide with 3 inputs:
-                    1. Requirement of the EU regulation 2024/2847 (CRA) to audit against.
-                    2. Notes from the audit.
-                    3. Guidance on how the requirement should be implemented.
-                    Reply with a list of potential findings including citations of requirements (not guidance). Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
+                    "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                    1. Requirement of the EU regulation 2024/2847 (Cyber Resilience Act) to audit against.
+                    2. General information about the company being audited.
+                    3. Notes from the audit.
+                    Review notes and reply with a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
+                    When evaluating consider the following:
+                    1. Does the company have documented roles, responsibilities, and processes to meet its obligations?
+                    2. If any reporting or notifications are needed, does the company have reports, dashboards, approved communication channels, and protocols?
+                    3. Has the company identified the authorities it needs to communicate with and does it have access to the tools for that?
+                    4. Does the company collect, store, and retain sufficient data to meet its obligations?
                     When replying, follow these rules:
                     1. Do not repeat instructions. 
                     2. Only use the information from notes relevant for each requirement. 
                     3. Do not provide implementation summary. 
                     4. Only include issues that are explicitly mentioned in the notes. 
-                    5. If the implementation is not mentioned or inforamtion insufffienct in the notes, do not asume it is a finding, reply with "more information needed to conclude".
+                    5. If the implementation is not mentioned or information unstuffiness in the notes, do not assume it is a finding, reply with "more information needed to conclude".
                     6. 200 words maximum per finding.
                     \n---\n
                     Input 1 (Requirement): \n---\n {article_title} {article_text} \n---\n
-                    Input 2 (Guidance):  \n---\n {guidance_text} \n---\n
+                    Input 3 (Information about the company being audited): Oeprating in {Industry} industry, headquarters in {HQ_location} with {No_of_sites} of remote sites in {Locations_of_sites}  \n---\n
                     Input 2 (Notes):  \n---\n {notes}""",
                 }
                 ]
@@ -748,18 +751,15 @@ elif add_selectbox=="CRA assessment support":
                 message3 = [
                 {
                     "role": "developer",
-                    "content": f"""You are a cybersecurity audit assistant. I will provide with 3 inputs:
-                    1. Requirement of the EU regulation 2024/2847 (CRA) to audit against.
-                    2. Audit findings
+                    "content": f"""You are a cybersecurity audit assistant. I will provide findings from the audit against EU regulation 2024/2847 (Cyber Resilience Act) {article_title}
                     You need to write risk statements for the provided findings. When replying, follow these rules:
                     1. Do not repeat instructions.
-                    2. If the finding only references the fact that the information is missing or insufficent reply with "No specific risks - more infortmation needed".
+                    2. If the finding only references the fact that the information is missing or insufficient, reply with "No specific risks - more information needed".
                     2. Only use the information from findings. 
-                    3. Do not include follow-up questions or next steps, only write risk statements.
+                    3. Do not include follow-up questions or next steps, only write risk statements or "No specific risks - more information needed".
                     4. Reply with 100 words maximum for each risk.
-                    5. Apply good practice for writing IT risk statements by explaining why each risk is important.
+                    5. Apply good practice for writing IT risk statements by explaining why each risk is important and what it can lead to.
                     \n---\n
-                    Input 1 (requirement): \n---\n {article_title} {article_text} \n---\n
                     Audit findings:  \n---\n {LLM_reply_findings}""",
                 }
                 ]
