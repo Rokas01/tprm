@@ -694,8 +694,9 @@ elif add_selectbox=="CRA assessment support":
                     "role": "developer",
                     "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
                     1. Requirement of the EU regulation 2024/2847 (Cyber Resilience Act) to audit against.
-                    2. Notes from the audit.
-                    Reply with a short and formal summary of how the requirement is implemented based on the notes provided.
+                    2. Audit guidance.
+                    3. Notes from the audit.
+                    Reply with a short and formal summary of how the requirement is implemented based on the notes provided. If the information is sufficient, incldue how guidance are addressed, else, do not mention the guidance.
                     When replying, follow these rules:
                     1. Do not repeat instructions.
                     2. Do not repeat requirements or guidance.
@@ -705,7 +706,8 @@ elif add_selectbox=="CRA assessment support":
                     7. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:".
                     \n---\n
                     Input 1 (article): \n---\n {article_title} {article_text} \n---\n
-                    Input 2 (Notes):  \n---\n {notes}""",
+                    Input 2 (audit guidance): \n---\n {guidance_text} \n---\n
+                    Input 3 (Notes):  \n---\n {notes}""",
                 }
                 ]
 
