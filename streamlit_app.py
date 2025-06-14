@@ -725,14 +725,15 @@ elif add_selectbox=="CRA assessment support":
                     2. Audit guidance.
                     3. General information about the company being audited.
                     4. Notes from the audit.
-                    Review notes and reply with a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
+                    Review notes and reply with a list of potential findings. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
                     When replying, follow these rules:
                     1. Do not repeat instructions. 
-                    2. Only use the information from notes relevant for each requirement. 
+                    2. Only use the information from notes relevant for this requirement.
                     3. Do not provide implementation summary. 
                     4. Only include issues that are explicitly mentioned in the notes. 
                     5. If the implementation is not mentioned or information unstuffiness in the notes, do not assume it is a finding, reply with "more information needed to conclude".
                     6. 200 words maximum per finding.
+                    7. Provide an exact text citation from the requirement to justify the finding.
                     \n---\n
                     Input 1 (Requirement): \n---\n {article_title} {article_text} \n---\n
                     Input 2 (audit guidance): \n---\n {guidance_text} \n---\n
