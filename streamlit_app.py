@@ -93,7 +93,7 @@ def text_preprocessing():
 add_selectbox = st.sidebar.selectbox(
     "Please select use-case",
     ("Document reviewer", "Duplicate checker", 
-     "Discount validation", "NIS2 assessment support", "ISO27k assessment support", "CRA assessment support")
+     "Discount validation", "NIS2 assessment support", "ISO27k assessment support", "CRA assessment support", "chat")
 )
 
 presentation_template = st.sidebar.file_uploader(
@@ -791,6 +791,45 @@ elif add_selectbox=="CRA assessment support":
             icon=":material/download:",
             key=2                                                           
         )
+
+#=================================
+#CRA assessment support
+#=================================
+elif add_selectbox=="chat":
+
+    # Set a default model
+    if "openai_model" not in st.session_state:
+        st.session_state["openai_model"] = selected_model
+
+    # Initialize chat history
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    # Display chat messages from history on app rerun
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # Accept user input
+    if prompt := st.chat_input("What is up?"):
+        # Add user message to chat history
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        # Display user message in chat message container
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+
+    with st.chat_message("assistant"):
+        stream = client.chat.completions.create(
+            model=st.session_state["openai_model"],
+            messages=[
+                {"role": m["role"], "content": m["content"]}
+                for m in st.session_state.messages
+            ],
+            stream=True,
+        )
+        response = st.write_stream(stream)
+    st.session_state.messages.append({"role": "assistant", "content": response})
 
 else:
     st.write("Not yet implemented")

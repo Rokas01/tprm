@@ -3,7 +3,6 @@ from pptx.util import Pt
 from io import BytesIO
 
 
-
 def apply_font(text_object):
     font = text_object.font
     font.name = 'Calibri'
@@ -13,9 +12,7 @@ def apply_font(text_object):
 
 
 
-
-def add_slide(prs_object_input, layout_input, title_input, requirement_text=True):
-    """Return slide newly added to `prs` using `layout` and having `title`."""
+def add_slide(prs_object_input, title_input, requirement_text=True):
 
     slide_heading_from_call = title_input[0]
     requirement_text_from_call = title_input[1]
@@ -23,61 +20,35 @@ def add_slide(prs_object_input, layout_input, title_input, requirement_text=True
     observation_text_from_call = title_input[3]
     risks_text_from_call = title_input[4]
     
-    slide = prs_object_input.slides.add_slide(layout_input)
-    #slide.shapes.title.text = slide_heading_from_call
-    title_para = slide.shapes.title.text_frame.paragraphs[0]
+    #Adding slide 1
+    #==============
+    slide1 = prs_object_input.slides.add_slide(prs_object_input.slide_layouts[1])
+
+    heading_box, requirement_box, summary_box = slide1.placeholders
+
+    title_para = slide1.shapes.title.text_frame.paragraphs[0]
     title_para.font.size = Pt(26)
     title_para.text = slide_heading_from_call
 
-    shapes = slide.shapes
-    body_shape = shapes.placeholders[1]
-    tf = body_shape.text_frame
-
     if requirement_text == True:
-        p0 = tf.add_paragraph()
-        p0.text = 'Requirement'
-        p0.font.size = Pt(12)
-        p0.font.bold = True
 
-        p1 = tf.add_paragraph()
-        p1.text = requirement_text_from_call
-        p1.font.size = Pt(9)
-        p1.level = 1
+        requirement_box.text = requirement_text_from_call
 
-    p2 = tf.add_paragraph()
-    p2.text = "Summary"
-    p2.level = 0
-    p2.font.size = Pt(12)
-    p2.font.bold = True
+    summary_box.text = summary_text_from_call
 
-    p3 = tf.add_paragraph()
-    p3.text = summary_text_from_call
-    p3.font.size = Pt(9)
-    p3.level = 1
+    #Adding slide 2
+    #==============
+    slide2 = prs_object_input.slides.add_slide(prs_object_input.slide_layouts[2])
 
-    p4 = tf.add_paragraph()
-    p4.text = "Emerging observations"
-    p4.font.size = Pt(12)
-    p4.font.bold = True
-    p4.level = 0
+    title_para = slide2.shapes.title.text_frame.paragraphs[0]
+    title_para.font.size = Pt(26)
+    title_para.text = slide_heading_from_call
 
-    p5 = tf.add_paragraph()
-    p5.text = observation_text_from_call
-    p5.font.size = Pt(9)
-    p5.level = 1
+    heading_box, findings_box, risks_box = slide2.placeholders
 
-    p6 = tf.add_paragraph()
-    p6.text = "Risks"
-    p6.font.size = Pt(12)
-    p6.font.bold = True
-    p6.level = 0
-
-    p7 = tf.add_paragraph()
-    p7.text = risks_text_from_call
-    p7.font.size = Pt(9)
-    p7.level = 1
+    findings_box.text = observation_text_from_call
     
-    return slide
+    risks_box.text = risks_text_from_call
 
 
 def create_presentation_report_findings(title_text, subtitle_text, requirementsAndFindings, include_requirement_text=True, custom_template=None):
@@ -91,32 +62,28 @@ def create_presentation_report_findings(title_text, subtitle_text, requirementsA
         path = 'template.pptx'
         prs = Presentation(path)
 
-    #prs = Presentation()
-
     title_slide_layout = prs.slide_layouts[0]
     slide = prs.slides.add_slide(title_slide_layout)
     title = slide.shapes.title
-    subtitle = slide.placeholders[1]
+
+    print(slide.placeholders)
+    subtitle = slide.placeholders[0]
 
     title.text = title_text
     subtitle.text = subtitle_text
 
     for requirement in requirementsAndFindings:
 
-        bullet_slide_layout = prs.slide_layouts[1]
-
-        add_slide(prs, bullet_slide_layout, requirement, requirement_text=include_requirement_text)
+        add_slide(prs, requirement, requirement_text=include_requirement_text)
  
-
-    #prs.save(filename)
+    #prs.save("filename.pptx")
 
     binary_output = BytesIO()
     prs.save(binary_output) 
 
     return binary_output.getvalue()
 
-
-#test_results = [["Article 21", "The measures referred to in paragraph 1 shall be based", "this is a summary", "not requested"], ["Article 22", "test text for the next article", "this is a summary", "not requested"]]
+#test_results = [["Article 21", "This is a requirement text", "this is a summary", "This is an observation", "This is a risk"], ["Article 22", "test text for the next article", "this is a summary", "not requested", "this is input 4"]]
 
 #create_presentation_report_findings("NIS2 compliance", "assessment report", test_results)
 

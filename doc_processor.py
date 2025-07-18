@@ -53,7 +53,6 @@ def read_document_w_categories(directory, file, delims=[], strip_new_line = True
 
         d[category].append(split_text)
 
-
     return d
             
 
@@ -66,19 +65,10 @@ def read_document_w_categories(directory, file, delims=[], strip_new_line = True
 
 #CRA = read_document_w_categories("CRA", "reg-text.txt", delims=["#", "£", "@"], strip_new_line = True)
 
-
 #print(annexA['Information & Communications Security'][0])
 #print(Guidance[annexA['Information & Communications Security'][0][0]][0][0])
 
-
-
-
 #print(test["8.34 Protection of information systems during audit testing."])
 
-
 #selected_category = test["Cryptography"]
-
-
-
-
 
