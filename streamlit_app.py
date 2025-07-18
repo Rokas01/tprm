@@ -532,18 +532,19 @@ elif add_selectbox=="ISO27k assessment support":
                     1. ISO 27001:2022 requirement to audit against.
                     2. ISO 27002:2022 guidance on how to implement ISO 27001:2022.
                     2. Notes from the audit.
-                    Reply with a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
+                    Reply with a list of potential findings. Clearly state if the information provided is insufficient to conclude if there is a finding and propose follow-up questions.
                     When replying, follow these rules:
-                    1. Do not repeat instructions. 
-                    2. Only use the information from notes relevant for each requirement. 
-                    3. Do not provide implementation summary. 
-                    4. Only include issues that are explicitly mentioned in the notes. 
-                    5. If the implementation is not mentioned or inforamtion insufffienct in the notes, do not asume it is a finding, reply with "more information needed to conclude".
-                    6. 200 words maximum per finding.
+                    1. Do not repeat instructions.
+                    2. Only use the information from notes relevant to this requirement. Ignore irrelevant notes.
+                    3. Do not provide an implementation summary.
+                    4. Do not include risks or recommendations, only observations.
+                    5. Only include issues that are explicitly mentioned in the notes.
+                    6. If the implementation is not mentioned or the information is insufficient in the notes, do not assume it is a finding. Reply with "more information needed to conclude".
+                    100 words maximum per finding.
                     \n---\n
                     Input 1 (Requirement): \n---\n {article_title} {article_text} \n---\n
                     Input 2 (Guidance):  \n---\n {guidance_text} \n---\n
-                    Input 2 (Notes):  \n---\n {notes}""",
+                    Input 3 (Notes):  \n---\n {notes}""",
                 }
                 ]
 
@@ -557,14 +558,15 @@ elif add_selectbox=="ISO27k assessment support":
                     "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
                     1. ISO 27001:2022 requirement to audit against.
                     2. Notes from the audit.
-                    Reply with a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
+                    Reply with a list of potential findings. Clearly state if the information provided is insufficient to conclude if there is a finding and propose follow-up questions.
                     When replying, follow these rules:
-                    1. Do not repeat instructions. 
-                    2. Only use the information from notes relevant for each requirement. 
-                    3. Do not provide implementation summary. 
-                    4. Only include issues that are explicitly mentioned in the notes. 
-                    5. If the implementation is not mentioned or inforamtion insufffienct in the notes, do not asume it is a finding, reply with "more information needed to conclude".
-                    6. 100 words maximum per finding.
+                    1. Do not repeat instructions.
+                    2. Only use the information from notes relevant to this requirement. Ignore irrelevant notes.
+                    3. Do not provide an implementation summary.
+                    4. Do not include risks or recommendations, only observations.
+                    5. Only include issues that are explicitly mentioned in the notes.
+                    6. If the implementation is not mentioned or the information is insufficient in the notes, do not assume it is a finding. Reply with "more information needed to conclude".
+                    100 words maximum per finding.
                     \n---\n
                     Input 1 (Requirement): \n---\n {article_title} {article_text} \n---\n
                     Input 2 (Notes):  \n---\n {notes}""",
