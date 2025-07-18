@@ -233,19 +233,15 @@ elif add_selectbox=="Discount validation":
 #=================================
 elif add_selectbox=="NIS2 assessment support":
 
-    framework = st.selectbox(
-    "Please select the standard or framework in scope:",
-    ("EU Directive 2022/2555 (NIS2)"),
-    )
-
-    # Intiailizing checkboxes
+    control_group = add_ISMS_area_selector(st)
+    
+    # Intializing checkboxes
     st.write("Pelase select options:")
-    selection_applibability = st.checkbox("Applicability assessment")
     selection_implementation_summary = st.checkbox("Implementation summary")
     selection_observations = st.checkbox("Observations")
     selection_risks = st.checkbox("Risks (Important - observations MUST be selected)")
-    selection_applicability = st.checkbox("Include requirement text in responses")
-
+    selection_applicability = st.checkbox("Include requirement text in responses?")
+    st.write("NOTE: the assessment is ONLY performed against ENISA guidelines and article 23")
 
     # Collecting basic info about the organization
     st.write("Enter basic information about the organization:")
@@ -258,174 +254,144 @@ elif add_selectbox=="NIS2 assessment support":
     placeholder="Enter country of HQ")
     
     No_of_sites = st.text_input(
-    "No of manufacturing sites in scope for this assessment:",
-    placeholder="Enter the number of sites within EU")
+    "No of sites operating under the same ISMS:",
+    placeholder="Enter the number of sites")
 
     Locations_of_sites = st.text_input(
-    "Locations of manufacturing sites in-scope for this assessment:",
+    "Locations of sites in-scope for this assessment:",
     placeholder="Enter locations (countries only) of all sites (e.g. Germany, Austria, Italy)")
     
-
     # Initializing default responses
     LLM_reply_applicability = "applicability not requested"
     LLM_reply_summary = "summary not requested"
     LLM_reply_findings = "observations not requested"
     LLM_reply_risks = "risks not requested"
 
-
     # Text field to input notes
     notes = st.text_area(
         "Meeting notes:",
         placeholder="Enter your notes here")
     
-    st.write(f" **Important: ** the assessment is only performed against articles 20, 21, 23 and 24 + applicability check against art.3 and art.26.")
-
 
     if st.button("Process"):
 
-        if selection_applibability:
+        st.write(f" **Assessment summary**")
 
-            with open("NIS2-art26.txt","r") as f:
-                requirement_text_file = f.read()
+        full_NIS2_w_ENISA = doc_processor.read_document_w_categories("NIS2", "enisa.txt", delims=["£", "$"], strip_new_line = True,  char_to_strip="")
+ 
+        selected_category = full_NIS2_w_ENISA[control_group]
 
-            message0 = [
+        part_2_response_article =[]
+        part_2_response_AISummary =[]
+        part_2_response_AIFindings = []
+        part2_response_AIRisks = []
+        pptx_generator_input = []
+
+        for file in selected_category:
+
+            article_title = file[0]
+            article_text = file[1]
+
+            part_2_response_article.append(article_title)
+
+            if selection_implementation_summary:
+
+                message1 = [
                 {
                     "role": "developer",
-                    "content": f"""You are a legal assistant. I will provide 2 inputs:
-                    1. Information about the company.
-                    2. Two articles of the EU directive addressing its applicability.
-                    Reply with if the directive is applicable for the company. Provide justificaiton. Do not repeat instructions. 
-                    If the information provided is insufficient to conclude provide a list of follow-up questions.
-                    Input 1 (Company data): 
-                    1.1 Operating in the {Industry} industry, 
-                    1.2 head office located in {HQ_location}, 
-                    1.3 {No_of_sites} manufacturing sites located in: {Locations_of_sites} .
-                    Input 2 (articles): \n---\n {requirement_text_file} \n---\n"""
+                    "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                    1. EU directive NIS2 requirement to audit against.
+                    2. Notes from the audit.
+                    Reply with a short and formal summary of how the requirement is implemented based on the notes provided.
+                    When replying, follow these rules:
+                    1. Do not repeat instructions.
+                    2. Do not repeat requirements.
+                    4. Use only the information provided in the notes, do not include any additional context.
+                    5. Maximum 200 words.
+                    6. Do not use bullet points, write as a one paragraph.
+                    7. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:".
+                    \n---\n
+                    Input 1 (article): \n---\n {article_title} {article_text} \n---\n
+                    Input 2 (Notes):  \n---\n {notes}""",
                 }
-            ]
+                ]
 
-            LLM_reply_applicability = openAI_processor(message0, selected_model)
+                LLM_reply_summary = openAI_processor(message1, selected_model)
 
-            st.write(f" **1. Overview and applicability**")
-            st.write(LLM_reply_applicability)
+            part_2_response_AISummary.append(LLM_reply_summary)
 
-        if selection_implementation_summary or selection_observations or selection_risks:
+            if selection_observations: #with ISO 27002
 
-            st.write(f" **2. Assessment summary**")
+                message2 = [
+                {
+                    "role": "developer",
+                    "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                    1. EU directive NIS2 requirement to audit against.
+                    2. Notes from the audit.
+                    Reply with a list of potential findings. Clearly state if the information provided is insufficient to conclude if there is a finding and propose follow-up questions.
+                    When replying, follow these rules:
+                    1. Do not repeat instructions.
+                    2. Only use the information from notes relevant to this requirement. Ignore irrelevant notes.
+                    3. Do not provide an implementation summary.
+                    4. Do not include risks or recommendations, only observations.
+                    5. Only include issues that are explicitly mentioned in the notes.
+                    6. If the implementation is not mentioned or the information is insufficient in the notes, do not assume it is a finding. Reply with "more information needed to conclude".
+                    100 words maximum per finding.
+                    \n---\n
+                    Input 1 (Requirement): \n---\n {article_title} {article_text} \n---\n
+                    Input 2 (Notes):  \n---\n {notes}""",
+                }
+                ]
 
-            directory = os.fsencode("NIS2-breakdown")
+                LLM_reply_findings = openAI_processor(message2, selected_model)
 
-            part_2_response_article =[]
-            part_2_response_AISummary =[]
-            part_2_response_AIFindings = []
-            part2_response_AIRisks = []
-            pptx_generator_input = []
+                
+            part_2_response_AIFindings.append(LLM_reply_findings)
 
-            for file in os.listdir(directory):
+            if selection_risks:
 
-                filename = os.fsdecode(file)
+                message3 = [
+                {
+                    "role": "developer",
+                    "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                    1. ISO 27001:2022 requirement to audit against.
+                    2. Audit findings
+                    You need to write risk statements for the provided findings. When replying, follow these rules:
+                    1. Do not repeat instructions.
+                    2. If the finding only references the fact that the information is missing or insufficent reply with "No specific risks - more infortmation needed".
+                    2. Only use the information from findings. 
+                    3. Do not include follow-up questions or next steps, only write risk statements.
+                    4. Reply with 100 words maximum for each risk.
+                    5. Apply good practice for writing IT risk statements by explaining why each risk is important.
+                    \n---\n
+                    Input 1 (requirement): \n---\n {article_title} {article_text} \n---\n
+                    Audit findings:  \n---\n {LLM_reply_findings}""",
+                }
+                ]
 
-                requirement_text_file = open(os.path.join("NIS2-breakdown", filename),'r')
-                article_title = requirement_text_file.readline().rstrip()
-                article_text = requirement_text_file.read()
-                requirement_text_file.close()
+                LLM_reply_risks = openAI_processor(message3, selected_model)
 
-                part_2_response_article.append(article_title)
+            part2_response_AIRisks.append(LLM_reply_risks)
 
-                if selection_implementation_summary:
+            pptx_temp_storage = [article_title, article_text, LLM_reply_summary, LLM_reply_findings, LLM_reply_risks]
+            pptx_generator_input.append(pptx_temp_storage)
 
-                    message1 = [
-                    {
-                        "role": "developer",
-                        "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
-                        1. Article form the EU directive to audit against.
-                        2. Notes from the audit.
-                        Reply with a coherent and easy to read summary of how all requirements of this article are implemented based on the notes provided.
-                        When replying, follow these rules:
-                        1. Do not repeat instructions.
-                        2. Do not repeat requirements.
-                        4. Use only the information provided in the notes, do not include any additional context.
-                        5. Maximum 200 words.
-                        6. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:" and clarify why this information is needed.
-                        \n---\n
-                        Input 1 (article): \n---\n {article_title} {article_text} \n---\n
-                        Input 2 (Notes):  \n---\n {notes}""",
-                    }
-                    ]
+        part_2_response = pd.DataFrame()
+        part_2_response['Summary'] = part_2_response_AISummary
+        part_2_response['Potential findings'] = part_2_response_AIFindings
+        part_2_response['Risks'] = part2_response_AIRisks    
+        part_2_response.index = part_2_response_article
 
-                    LLM_reply_summary = openAI_processor(message1, selected_model)
+        st.dataframe(part_2_response, height=1500, row_height=400)
 
-                part_2_response_AISummary.append(LLM_reply_summary)
+        st.download_button(
+            label="Download draft report",
+            data=prepare_download(pptx_generator_input, include_article=selection_applicability, presentation_title="ISO 27001:2022 annex A asessment"),
+            file_name="ISMS-generated-draft-report.pptx",
+            icon=":material/download:",
+            key=2
+        )
 
-                if selection_observations:
-
-                    message2 = [
-                    {
-                        "role": "developer",
-                        "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
-                        1. Article form the EU directive to audit against.
-                        2. Notes from the audit.
-                        Reply with a list of potential findings including citations of requirements. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
-                        When replying, follow these rules:
-                        1. Do not repeat instructions. 
-                        2. Only use the information from notes relevant for each article. 
-                        3. Do not provide implementation summary. 
-                        4. Only include issues that are explicitly mentioned in the notes. 
-                        5. If the implementation is not mentioned or information insufffienct in the notes, do not asume it is a finding, reply with "more information needed to conclude".
-                        6. 100 words maximum per finding.
-                        \n---\n
-                        Input 1 (article): \n---\n {article_title} {article_text} \n---\n
-                        Input 2 (Notes):  \n---\n {notes}""",
-                    }
-                    ]
-
-                    LLM_reply_findings = openAI_processor(message2, selected_model)
-
-                part_2_response_AIFindings.append(LLM_reply_findings)
-
-                if selection_risks:
-
-                    message3 = [
-                    {
-                        "role": "developer",
-                        "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
-                        1. Article form the EU directive to audit against.
-                        2. Audit findings
-                        You need to write risk statements for the provided findings. When replying, follow these rules:
-                        1. Do not repeat instructions.
-                        2. If the finding only references the fact that the information is missing or insufficent reply with "No specific risks - more information needed".
-                        2. Only use the information from findings. 
-                        3. Do not include follow-up questions or next steps, only write risk statements.
-                        4. Reply with 100 words maximum for each risk.
-                        5. Apply good practice for writing IT risk statements by explaining potential impacts to the organization.
-                        \n---\n
-                        Input 1 (article): \n---\n {article_title} {article_text} \n---\n
-                        Audit findings:  \n---\n {LLM_reply_findings}""",
-                    }
-                    ]
-
-                    LLM_reply_risks = openAI_processor(message3, selected_model)
-
-                part2_response_AIRisks.append(LLM_reply_risks)
-
-
-                pptx_temp_storage = [article_title, article_text, LLM_reply_summary, LLM_reply_findings, LLM_reply_risks]
-                pptx_generator_input.append(pptx_temp_storage)
-
-            part_2_response = pd.DataFrame()
-            part_2_response['Summary'] = part_2_response_AISummary
-            part_2_response['Potential findings'] = part_2_response_AIFindings
-            part_2_response['Risks'] = part2_response_AIRisks    
-            part_2_response.index = part_2_response_article
-
-            st.dataframe(part_2_response, height=1500, row_height=400)
-
-            st.download_button(
-                label="Download draft report",
-                data=prepare_download(pptx_generator_input, include_article=selection_applicability),
-                file_name="NIS2-generated-draft-report.pptx",
-                icon=":material/download:",
-            )
 
 
 #=================================
