@@ -277,7 +277,7 @@ elif add_selectbox=="NIS2 assessment support":
 
         st.write(f" **Assessment summary**")
 
-        full_NIS2_w_ENISA = doc_processor.read_document_w_categories("NIS2", "enisa.txt", delims=["£", "$"], strip_new_line = True,  char_to_strip="")
+        full_NIS2_w_ENISA = doc_processor.read_document_w_categories("NIS2-breakdown", "enisa.txt", delims=["£", "$"], strip_new_line = True,  char_to_strip="")
  
         selected_category = full_NIS2_w_ENISA[control_group]
 
@@ -345,7 +345,7 @@ elif add_selectbox=="NIS2 assessment support":
 
                 LLM_reply_findings = openAI_processor(message2, selected_model)
 
-                
+
             part_2_response_AIFindings.append(LLM_reply_findings)
 
             if selection_risks:
