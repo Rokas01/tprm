@@ -15,6 +15,7 @@ st.set_page_config(page_title="AI prototyping", layout="wide")
 st.title("📄 AI prototyping")
 
 selected_model ="o4-mini"
+#selected_model ="o3-mini"
 #selected_model ="o3"
 
 def prepare_download(dict_to_use, include_article=True, presentation_title="NIS2 asessment"):
@@ -227,7 +228,9 @@ elif add_selectbox=="Discount validation":
         st.write(stream)
 
 
-
+#=================================
+#NIS2
+#=================================
 elif add_selectbox=="NIS2 assessment support":
 
     framework = st.selectbox(
@@ -296,7 +299,7 @@ elif add_selectbox=="NIS2 assessment support":
                     Input 1 (Company data): 
                     1.1 Operating in the {Industry} industry, 
                     1.2 head office located in {HQ_location}, 
-                    2.3 {No_of_sites} manufacturing sites located in: {Locations_of_sites} .
+                    1.3 {No_of_sites} manufacturing sites located in: {Locations_of_sites} .
                     Input 2 (articles): \n---\n {requirement_text_file} \n---\n"""
                 }
             ]
@@ -337,13 +340,13 @@ elif add_selectbox=="NIS2 assessment support":
                         "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
                         1. Article form the EU directive to audit against.
                         2. Notes from the audit.
-                        Reply with a coherent and easy to read summary of how requirements of this article are implemented based on the notes provided.
+                        Reply with a coherent and easy to read summary of how all requirements of this article are implemented based on the notes provided.
                         When replying, follow these rules:
                         1. Do not repeat instructions.
                         2. Do not repeat requirements.
                         4. Use only the information provided in the notes, do not include any additional context.
                         5. Maximum 200 words.
-                        6. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:".
+                        6. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:" and clarify why this information is needed.
                         \n---\n
                         Input 1 (article): \n---\n {article_title} {article_text} \n---\n
                         Input 2 (Notes):  \n---\n {notes}""",
@@ -368,7 +371,7 @@ elif add_selectbox=="NIS2 assessment support":
                         2. Only use the information from notes relevant for each article. 
                         3. Do not provide implementation summary. 
                         4. Only include issues that are explicitly mentioned in the notes. 
-                        5. If the implementation is not mentioned or inforamtion insufffienct in the notes, do not asume it is a finding, reply with "more information needed to conclude".
+                        5. If the implementation is not mentioned or information insufffienct in the notes, do not asume it is a finding, reply with "more information needed to conclude".
                         6. 100 words maximum per finding.
                         \n---\n
                         Input 1 (article): \n---\n {article_title} {article_text} \n---\n
@@ -394,7 +397,7 @@ elif add_selectbox=="NIS2 assessment support":
                         2. Only use the information from findings. 
                         3. Do not include follow-up questions or next steps, only write risk statements.
                         4. Reply with 100 words maximum for each risk.
-                        5. Apply good practice for writing IT risk statements by explaining why each risk is important.
+                        5. Apply good practice for writing IT risk statements by explaining potential impacts to the organization.
                         \n---\n
                         Input 1 (article): \n---\n {article_title} {article_text} \n---\n
                         Audit findings:  \n---\n {LLM_reply_findings}""",
@@ -724,21 +727,23 @@ elif add_selectbox=="CRA assessment support":
                     1. Requirement of the EU regulation 2024/2847 (Cyber Resilience Act) to audit against.
                     2. Audit guidance.
                     3. General information about the company being audited.
-                    4. Notes from the audit.
-                    Review notes and reply with a list of potential findings. Clearly state if the information provided is insufficient to conclude and propose follow-up questions.
+                    4. Overview of how this requirement is implemented.
+                    You need to review the implementaion overview (input 4) and decide if there is sufficient inforamtion to conclude on how the requirement is implemented.
+                    When replying use the following scenarios:
+                    1. If the information provided is insufficient to conclude how the requirements are implemented, reply with "more information needed to conclude" and propose follow-up questions.
+                    2. If the information provided is sufficient to conclude and the implementation is aligned with the requirements and guidance, reply with "no issues."
+                    3. If the information provided is sufficient to conclude, but the implementation is not fully aligned with the requirements or guidance, write a formal issue statement explaining exactly what is missing. Provide the exact citation from the requirement.
                     When replying, follow these rules:
                     1. Do not repeat instructions. 
                     2. Only use the information from notes relevant for this requirement.
                     3. Do not provide implementation summary. 
-                    4. Only include issues that are explicitly mentioned in the notes. 
-                    5. If the implementation is not mentioned or information unstuffiness in the notes, do not assume it is a finding, reply with "more information needed to conclude".
-                    6. 200 words maximum per finding.
-                    7. Provide an exact text citation from the requirement to justify the finding.
+                    4. Only include issues that are explicitly mentioned in the overview.
+                    5. 200 words maximum per finding.
                     \n---\n
                     Input 1 (Requirement): \n---\n {article_title} {article_text} \n---\n
                     Input 2 (audit guidance): \n---\n {guidance_text} \n---\n
                     Input 3 (Information about the company being audited): Operating in {Industry} industry, headquarters in {HQ_location} with {No_of_sites} of remote sites in {Locations_of_sites}  \n---\n
-                    Input 2 (Notes):  \n---\n {notes}""",
+                    Input 4 (Implementation overview):  \n---\n {notes}""",
                 }
                 ]
 
