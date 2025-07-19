@@ -51,26 +51,23 @@ def add_slide(prs_object_input, title_input, requirement_text=True):
     risks_box.text = risks_text_from_call
 
 
-def create_presentation_report_findings(title_text, subtitle_text, requirementsAndFindings, include_requirement_text=True, custom_template=None):
+def create_presentation_report_findings(title_text, subtitle_text, requirementsAndFindings, include_requirement_text=True, custom_template='template-NIS2.pptx'):
 
-    if custom_template is not None:
-
-        prs = Presentation(custom_template)
-
-    else:
-
-        path = 'template-NIS2.pptx'
-        prs = Presentation(path)
+    prs = Presentation(custom_template)
 
     title_slide_layout = prs.slide_layouts[0]
     slide = prs.slides.add_slide(title_slide_layout)
-    title = slide.shapes.title
 
-    print(slide.placeholders)
-    subtitle = slide.placeholders[0]
+    title_box, subtitle_box = slide.placeholders
 
-    title.text = title_text
-    subtitle.text = subtitle_text
+    #title = slide.shapes.title
+
+    #subtitle = slide.placeholders[0]
+
+    #title.text = title_text
+    #subtitle.text = subtitle_text
+    title_box.text = title_text
+    subtitle_box.text = subtitle_text
 
     for requirement in requirementsAndFindings:
 

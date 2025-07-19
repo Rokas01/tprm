@@ -18,9 +18,9 @@ selected_model ="o4-mini"
 #selected_model ="o3-mini"
 #selected_model ="o3"
 
-def prepare_download(dict_to_use, include_article=True, presentation_title="NIS2 asessment"):
+def prepare_download(dict_to_use, include_article=True, presentation_title="NIS2 asessment", template='template-NIS2.pptx'):
 
-    report = pptx_generator.create_presentation_report_findings(presentation_title, "Draft report", dict_to_use, include_requirement_text=include_article)
+    report = pptx_generator.create_presentation_report_findings(presentation_title, "Draft report", dict_to_use, include_requirement_text=include_article, custom_template=template)
 
     return report
 
@@ -422,7 +422,7 @@ elif add_selectbox=="NIS2 assessment support":
 
         st.download_button(
             label="Download draft report",
-            data=prepare_download(pptx_generator_input, include_article=selection_applicability, presentation_title="ISO 27001:2022 annex A asessment"),
+            data=prepare_download(pptx_generator_input, include_article=selection_applicability, presentation_title="NIS2 asessment"),
             file_name="ISMS-generated-draft-report.pptx",
             icon=":material/download:",
             key=2
