@@ -72,6 +72,28 @@ def add_ISMS_area_selector(stramlit_object):
 
     return object_to_return
 
+def add_NIS2_area_selector(stramlit_object):
+
+    object_to_return = stramlit_object.selectbox(
+    "Please select area under review:",
+    ("1. POLICY ON THE SECURITY OF NETWORK AND INFORMATION SYSTEMS",
+        "2. RISK MANAGEMENT POLICY",
+        "3. INCIDENT HANDLING",
+        "4. BUSINESS CONTINUITY AND CRISIS MANAGEMENT",
+        "5. SUPPLY CHAIN SECURITY",
+        "6. SECURITY IN NETWORK AND INFORMATION SYSTEMS ACQUISITION, DEVELOPMENT AND MAINTENANCE",
+        "7. POLICIES AND PROCEDURES TO ASSESS THE EFFECTIVENESS OF CYBERSECURITY RISK MANAGEMENT MEASURES",
+        "9. CRYPTOGRAPHY",
+        "10. HUMAN RESOURCES SECURITY",
+        "11. ACCESS CONTROL",
+        "12. ASSET MANAGEMENT",
+        "13. ENVIRONMENTAL AND PHYSICAL SECURITY",
+        "Article 23"),
+    )
+
+    return object_to_return
+
+
 def template_uploader():
 
     return 0
@@ -233,7 +255,7 @@ elif add_selectbox=="Discount validation":
 #=================================
 elif add_selectbox=="NIS2 assessment support":
 
-    control_group = add_ISMS_area_selector(st)
+    control_group = add_NIS2_area_selector(st)
     
     # Intializing checkboxes
     st.write("Pelase select options:")
@@ -320,7 +342,7 @@ elif add_selectbox=="NIS2 assessment support":
 
             part_2_response_AISummary.append(LLM_reply_summary)
 
-            if selection_observations: #with ISO 27002
+            if selection_observations:
 
                 message2 = [
                 {

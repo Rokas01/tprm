@@ -59,7 +59,7 @@ def create_presentation_report_findings(title_text, subtitle_text, requirementsA
 
     else:
 
-        path = 'template.pptx'
+        path = 'template-NIS2.pptx'
         prs = Presentation(path)
 
     title_slide_layout = prs.slide_layouts[0]
