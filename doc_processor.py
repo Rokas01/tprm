@@ -56,6 +56,10 @@ def read_document_w_categories(directory, file, delims=[], strip_new_line = True
     return d
             
 
+#x = read_document_w_categories("NIS2-breakdown", "enisa.txt", delims=["£", "$"], strip_new_line = True,  char_to_strip="")
+
+
+
 #read_document("ISO27k", "Main.txt", "#", "£")
 
 #read_document("ISO27k", "AnnexA.txt", "#", "£", strip_new_line = True)

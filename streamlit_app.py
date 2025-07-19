@@ -304,14 +304,14 @@ elif add_selectbox=="NIS2 assessment support":
 
         full_NIS2_w_ENISA = doc_processor.read_document_w_categories("NIS2-breakdown", "enisa.txt", delims=["£", "$"], strip_new_line = True,  char_to_strip="")
  
- 
+
         if selection_full_scope:
             
             selected_category =[]
 
             for area in full_NIS2_w_ENISA:
                 
-                selected_category.append([area[0], area[1]])
+                selected_category.append([ full_NIS2_w_ENISA[area][0][0], full_NIS2_w_ENISA[area][0][1] ])
 
         else:
             selected_category = full_NIS2_w_ENISA[control_group]
