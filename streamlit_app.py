@@ -255,10 +255,13 @@ elif add_selectbox=="Discount validation":
 #=================================
 elif add_selectbox=="NIS2 assessment support":
 
+
+    st.write("Select areas in-scope or click FULL SCOPE below")
     control_group = add_NIS2_area_selector(st)
+    selection_full_scope = st.checkbox("FULL SCOPE")
     
     # Intializing checkboxes
-    st.write("Pelase select options:")
+    st.write("Select reporting options:")
     selection_implementation_summary = st.checkbox("Implementation summary")
     selection_observations = st.checkbox("Observations")
     selection_risks = st.checkbox("Risks (Important - observations MUST be selected)")
@@ -301,13 +304,24 @@ elif add_selectbox=="NIS2 assessment support":
 
         full_NIS2_w_ENISA = doc_processor.read_document_w_categories("NIS2-breakdown", "enisa.txt", delims=["£", "$"], strip_new_line = True,  char_to_strip="")
  
-        selected_category = full_NIS2_w_ENISA[control_group]
+ 
+        if selection_full_scope:
+            
+            selected_category =[]
+
+            for area in full_NIS2_w_ENISA:
+                
+                selected_category.append([area[0], area[1]])
+
+        else:
+            selected_category = full_NIS2_w_ENISA[control_group]
 
         part_2_response_article =[]
         part_2_response_AISummary =[]
         part_2_response_AIFindings = []
         part2_response_AIRisks = []
         pptx_generator_input = []
+
 
         for file in selected_category:
 
