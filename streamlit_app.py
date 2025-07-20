@@ -118,9 +118,9 @@ add_selectbox = st.sidebar.selectbox(
      "Discount validation", "NIS2 assessment support", "ISO27k assessment support", "CRA assessment support", "chat")
 )
 
-presentation_template = st.sidebar.file_uploader(
-    "Upload report template (pptx or ppt)", accept_multiple_files=False, type=[".pptx", ".ppt"]
-)
+#presentation_template = st.sidebar.file_uploader(
+#    "Upload report template (pptx or ppt)", accept_multiple_files=False, type=[".pptx", ".ppt"]
+#)
 
 
 # Using "with" notation
@@ -304,7 +304,6 @@ elif add_selectbox=="NIS2 assessment support":
 
         full_NIS2_w_ENISA = doc_processor.read_document_w_categories("NIS2-breakdown", "enisa.txt", delims=["£", "$"], strip_new_line = True,  char_to_strip="")
  
-
         if selection_full_scope:
             
             selected_category =[]
@@ -423,7 +422,7 @@ elif add_selectbox=="NIS2 assessment support":
         st.download_button(
             label="Download draft report",
             data=prepare_download(pptx_generator_input, include_article=selection_applicability, presentation_title="NIS2 asessment"),
-            file_name="ISMS-generated-draft-report.pptx",
+            file_name="NIS2-generated-draft-report.pptx",
             icon=":material/download:",
             key=2
         )
@@ -435,16 +434,22 @@ elif add_selectbox=="NIS2 assessment support":
 #=================================
 elif add_selectbox=="ISO27k assessment support":
 
+
+    st.write("Select controls in scope:")
+    selection_FUll_ISO27k = st.checkbox("All main ISO 27001 controls")
+    selection_include_annexA = st.checkbox("Include Annex A?")
+    st.write("______________________________________")
+    st.write("Select Annex A area in scope (box above MUST be selected)")
     control_group = add_ISMS_area_selector(st)
+    st.write("... or click FULL ANNEX A below to include all Annex A controls")
+    selection_full_scope_AnnexA = st.checkbox("FULL ANNEX A")
     
     # Intializing checkboxes
-    st.write("Pelase select options:")
+    st.write("______________________________________")
+    st.write("Pelase select assessment options:")
     selection_implementation_summary = st.checkbox("Implementation summary")
-    selection_observations = st.checkbox("Observations")
-    selection_risks = st.checkbox("Risks (Important - observations MUST be selected)")
-    selection_applicability = st.checkbox("Include requirement text in responses?")
-    selection_27002 = st.checkbox("Include ISO 27002 guidance when drafting observations?")
-    st.write("NOTE: the assessment is ONLY perofrmed agaisnt ISO27001 Annex A and (optional) ISO27002")
+    selection_observations = st.checkbox("Observations & risks")
+    st.write("______________________________________")
 
     # Collecting basic info about the organization
     st.write("Enter basic information about the organization:")
@@ -480,10 +485,10 @@ elif add_selectbox=="ISO27k assessment support":
 
         st.write(f" **Assessment summary**")
 
+        
         full_anenx_A = doc_processor.read_document_w_categories("ISO27k", "AnnexA.txt", delims=["£", "@"], strip_new_line = True,  char_to_strip="#")
-        guidance = doc_processor.read_document_w_categories("ISO27k", "Guidance.txt", delims=["#"], strip_new_line = True, char_to_strip="@") #new
 
-        selected_category = full_anenx_A[control_group]
+        ISO_main_clauses =[]
 
         part_2_response_article =[]
         part_2_response_AISummary =[]
@@ -491,13 +496,21 @@ elif add_selectbox=="ISO27k assessment support":
         part2_response_AIRisks = []
         pptx_generator_input = []
 
-        for file in selected_category:
 
-            article_title = file[0]
-            article_text = file[1]
-            guidance_text = guidance[article_title][0][0]
+        if selection_FUll_ISO27k:
 
-            part_2_response_article.append(article_title)
+            full_ISO27k = doc_processor.read_document_w_categories("ISO27k", "Main.txt", delims=["#", "£"], strip_new_line = True,  char_to_strip="")
+
+            for area in full_ISO27k:
+                
+                ISO_main_clauses.append([ full_ISO27k[area][0][0], full_ISO27k[area][0][1] ])
+        
+            for file in ISO_main_clauses:
+
+                article_title = file[0]
+                article_text = file[1]
+
+                part_2_response_article.append(article_title)
 
             if selection_implementation_summary:
 
@@ -525,34 +538,7 @@ elif add_selectbox=="ISO27k assessment support":
 
             part_2_response_AISummary.append(LLM_reply_summary)
 
-            if selection_observations and selection_27002: #with ISO 27002
-
-                message2 = [
-                {
-                    "role": "developer",
-                    "content": f"""You are a cybersecurity audit assistant. I will provide with 3 inputs:
-                    1. ISO 27001:2022 requirement to audit against.
-                    2. ISO 27002:2022 guidance on how to implement ISO 27001:2022.
-                    2. Notes from the audit.
-                    Reply with a list of potential findings. Clearly state if the information provided is insufficient to conclude if there is a finding and propose follow-up questions.
-                    When replying, follow these rules:
-                    1. Do not repeat instructions.
-                    2. Only use the information from notes relevant to this requirement. Ignore irrelevant notes.
-                    3. Do not provide an implementation summary.
-                    4. Do not include risks or recommendations, only observations.
-                    5. Only include issues that are explicitly mentioned in the notes.
-                    6. If the implementation is not mentioned or the information is insufficient in the notes, do not assume it is a finding. Reply with "more information needed to conclude".
-                    100 words maximum per finding.
-                    \n---\n
-                    Input 1 (Requirement): \n---\n {article_title} {article_text} \n---\n
-                    Input 2 (Guidance):  \n---\n {guidance_text} \n---\n
-                    Input 3 (Notes):  \n---\n {notes}""",
-                }
-                ]
-
-                LLM_reply_findings = openAI_processor(message2, selected_model)
-
-            else: #without ISO27002
+            if selection_observations:
 
                 message2 = [
                 {
@@ -577,11 +563,6 @@ elif add_selectbox=="ISO27k assessment support":
 
                 LLM_reply_findings = openAI_processor(message2, selected_model)
 
-                
-            part_2_response_AIFindings.append(LLM_reply_findings)
-
-            if selection_risks:
-
                 message3 = [
                 {
                     "role": "developer",
@@ -603,10 +584,125 @@ elif add_selectbox=="ISO27k assessment support":
 
                 LLM_reply_risks = openAI_processor(message3, selected_model)
 
+                
+            part_2_response_AIFindings.append(LLM_reply_findings)
+
             part2_response_AIRisks.append(LLM_reply_risks)
 
             pptx_temp_storage = [article_title, article_text, LLM_reply_summary, LLM_reply_findings, LLM_reply_risks]
             pptx_generator_input.append(pptx_temp_storage)
+
+
+        if selection_include_annexA:
+
+            AnenxA_clauses =[]
+            guidance = doc_processor.read_document_w_categories("ISO27k", "Guidance.txt", delims=["#"], strip_new_line = True, char_to_strip="@")
+
+            if selection_full_scope_AnnexA:
+                
+                for area in full_anenx_A:
+                    
+                    AnenxA_clauses.append([ full_anenx_A[area][0][0], full_anenx_A[area][0][1] ])
+
+            else:
+                AnenxA_clauses = full_anenx_A[control_group]
+
+
+            part_2_response_article =[]
+            part_2_response_AISummary =[]
+            part_2_response_AIFindings = []
+            part2_response_AIRisks = []
+            pptx_generator_input = []
+
+            for file in AnenxA_clauses:
+
+                article_title = file[0]
+                article_text = file[1]
+                guidance_text = guidance[article_title][0][0]
+
+                part_2_response_article.append(article_title)
+
+                if selection_implementation_summary:
+
+                    message1 = [
+                    {
+                        "role": "developer",
+                        "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                        1. ISO 27001:2022 requirement to audit against.
+                        2. Notes from the audit.
+                        Reply with a short and formal summary of how the requirement is implemented based on the notes provided.
+                        When replying, follow these rules:
+                        1. Do not repeat instructions.
+                        2. Do not repeat requirements.
+                        4. Use only the information provided in the notes, do not include any additional context.
+                        5. Maximum 200 words.
+                        6. Do not use bullet points, write as a one paragraph.
+                        7. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:".
+                        \n---\n
+                        Input 1 (article): \n---\n {article_title} {article_text} \n---\n
+                        Input 2 (Notes):  \n---\n {notes}""",
+                    }
+                    ]
+
+                    LLM_reply_summary = openAI_processor(message1, selected_model)
+
+                part_2_response_AISummary.append(LLM_reply_summary)
+
+                if selection_observations: #with ISO 27002
+
+                    message2 = [
+                    {
+                        "role": "developer",
+                        "content": f"""You are a cybersecurity audit assistant. I will provide with 3 inputs:
+                        1. ISO 27001:2022 requirement to audit against.
+                        2. ISO 27002:2022 guidance on how to implement ISO 27001:2022.
+                        2. Notes from the audit.
+                        Reply with a list of potential findings. Clearly state if the information provided is insufficient to conclude if there is a finding and propose follow-up questions.
+                        When replying, follow these rules:
+                        1. Do not repeat instructions.
+                        2. Only use the information from notes relevant to this requirement. Ignore irrelevant notes.
+                        3. Do not provide an implementation summary.
+                        4. Do not include risks or recommendations, only observations.
+                        5. Only include issues that are explicitly mentioned in the notes.
+                        6. If the implementation is not mentioned or the information is insufficient in the notes, do not assume it is a finding. Reply with "more information needed to conclude".
+                        100 words maximum per finding.
+                        \n---\n
+                        Input 1 (Requirement): \n---\n {article_title} {article_text} \n---\n
+                        Input 2 (Guidance):  \n---\n {guidance_text} \n---\n
+                        Input 3 (Notes):  \n---\n {notes}""",
+                    }
+                    ]
+
+                    LLM_reply_findings = openAI_processor(message2, selected_model)
+
+                    message3 = [
+                    {
+                        "role": "developer",
+                        "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                        1. ISO 27001:2022 requirement to audit against.
+                        2. Audit findings
+                        You need to write risk statements for the provided findings. When replying, follow these rules:
+                        1. Do not repeat instructions.
+                        2. If the finding only references the fact that the information is missing or insufficent reply with "No specific risks - more infortmation needed".
+                        2. Only use the information from findings. 
+                        3. Do not include follow-up questions or next steps, only write risk statements.
+                        4. Reply with 100 words maximum for each risk.
+                        5. Apply good practice for writing IT risk statements by explaining why each risk is important.
+                        \n---\n
+                        Input 1 (requirement): \n---\n {article_title} {article_text} \n---\n
+                        Audit findings:  \n---\n {LLM_reply_findings}""",
+                    }
+                    ]
+
+                    LLM_reply_risks = openAI_processor(message3, selected_model)
+
+                    
+                part_2_response_AIFindings.append(LLM_reply_findings)
+
+                part2_response_AIRisks.append(LLM_reply_risks)
+
+                pptx_temp_storage = [article_title, article_text, LLM_reply_summary, LLM_reply_findings, LLM_reply_risks]
+                pptx_generator_input.append(pptx_temp_storage)
 
         part_2_response = pd.DataFrame()
         part_2_response['Summary'] = part_2_response_AISummary
@@ -618,7 +714,7 @@ elif add_selectbox=="ISO27k assessment support":
 
         st.download_button(
             label="Download draft report",
-            data=prepare_download(pptx_generator_input, include_article=selection_applicability, presentation_title="ISO 27001:2022 annex A asessment"),
+            data=prepare_download(pptx_generator_input, include_article=True, presentation_title="ISO 27001:2022 asessment"),
             file_name="ISMS-generated-draft-report.pptx",
             icon=":material/download:",
             key=2

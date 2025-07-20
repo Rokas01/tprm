@@ -2,14 +2,12 @@ from pptx import Presentation
 from pptx.util import Pt
 from io import BytesIO
 
-
 def apply_font(text_object):
     font = text_object.font
     font.name = 'Calibri'
     font.size = Pt(8)
     #font.bold = True
-    #font.italic = None  # cause value to be inherited from theme
-
+    #font.italic = None  #value to be inherited from theme
 
 
 def add_slide(prs_object_input, title_input, requirement_text=True):
@@ -34,11 +32,7 @@ def add_slide(prs_object_input, title_input, requirement_text=True):
 
         requirement_box.text = requirement_text_from_call
 
-        text_frame = requirement_box.text_frame
-        text_frame.word_wrap = True
-
     summary_box.text = summary_text_from_call
-
 
 
     #Adding slide 2
@@ -54,7 +48,6 @@ def add_slide(prs_object_input, title_input, requirement_text=True):
     findings_box.text = observation_text_from_call
     
     risks_box.text = risks_text_from_call
-
 
 def create_presentation_report_findings(title_text, subtitle_text, requirementsAndFindings, include_requirement_text=True, custom_template='template-NIS2.pptx'):
 
@@ -72,14 +65,14 @@ def create_presentation_report_findings(title_text, subtitle_text, requirementsA
 
         add_slide(prs, requirement, requirement_text=include_requirement_text)
  
-    #prs.save("filename.pptx")
+    prs.save("filename.pptx")
 
     binary_output = BytesIO()
     prs.save(binary_output) 
 
     return binary_output.getvalue()
 
-#test_results = [["Article 21", "This is a requirement text", "this is a summary", "This is an observation", "This is a risk"], ["Article 22", "test text for the next article", "this is a summary", "not requested", "this is input 4"]]
+#test_results = [["Article 21", "This is a requirement text This is a requirement text This", "this is a summary", "This is an observation", "This is a risk"], ["Article 22", "test text for the next article", "this is a summary", "not requested", "this is input 4"]]
 
 #create_presentation_report_findings("NIS2 compliance", "assessment report", test_results)
 
