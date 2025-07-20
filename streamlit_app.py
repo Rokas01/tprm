@@ -335,8 +335,8 @@ elif add_selectbox=="NIS2 assessment support":
                 message1 = [
                 {
                     "role": "developer",
-                    "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
-                    1. EU directive NIS2 requirement to audit against.
+                    "content": f"""You are a cybersecurity audit assistant perfroming an assessment against requirements of EU directive NIS2. I will provide with 2 inputs:
+                    1. Requirements of the ENISA (European Union Agency for Cybersecurity) guidance on how the NIS2 Directive should be implemented.
                     2. Notes from the audit.
                     Reply with a short and formal summary of how the requirement is implemented based on the notes provided.
                     When replying, follow these rules:
@@ -347,7 +347,7 @@ elif add_selectbox=="NIS2 assessment support":
                     6. Do not use bullet points, write as a one paragraph.
                     7. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:".
                     \n---\n
-                    Input 1 (article): \n---\n {article_title} {article_text} \n---\n
+                    Input 1 (Requirements): \n---\n {article_title} {article_text} \n---\n
                     Input 2 (Notes):  \n---\n {notes}""",
                 }
                 ]
@@ -361,10 +361,10 @@ elif add_selectbox=="NIS2 assessment support":
                 message2 = [
                 {
                     "role": "developer",
-                    "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
-                    1. EU directive NIS2 requirement to audit against.
+                    "content": f"""You are a cybersecurity audit assistant perfroming an assessment against requirements of EU directive NIS2. I will provide with 2 inputs:
+                    1. Requirements of the ENISA (European Union Agency for Cybersecurity) guidance on how the NIS2 Directive should be implemented.
                     2. Notes from the audit.
-                    Reply with a list of potential findings. Clearly state if the information provided is insufficient to conclude if there is a finding and propose follow-up questions.
+                    Reply with a list of potential findings. Clearly state if the information provided is insufficient to conclude whether there is a finding, and propose follow-up questions.
                     When replying, follow these rules:
                     1. Do not repeat instructions.
                     2. Only use the information from notes relevant to this requirement. Ignore irrelevant notes.
@@ -390,7 +390,7 @@ elif add_selectbox=="NIS2 assessment support":
                 {
                     "role": "developer",
                     "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
-                    1. ISO 27001:2022 requirement to audit against.
+                    1. Requirements of the ENISA (European Union Agency for Cybersecurity) guidance on how the NIS2 Directive should be implemented.
                     2. Audit findings
                     You need to write risk statements for the provided findings. When replying, follow these rules:
                     1. Do not repeat instructions.

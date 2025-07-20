@@ -34,7 +34,12 @@ def add_slide(prs_object_input, title_input, requirement_text=True):
 
         requirement_box.text = requirement_text_from_call
 
+        text_frame = requirement_box.text_frame
+        text_frame.word_wrap = True
+
     summary_box.text = summary_text_from_call
+
+
 
     #Adding slide 2
     #==============
@@ -60,12 +65,6 @@ def create_presentation_report_findings(title_text, subtitle_text, requirementsA
 
     title_box, subtitle_box = slide.placeholders
 
-    #title = slide.shapes.title
-
-    #subtitle = slide.placeholders[0]
-
-    #title.text = title_text
-    #subtitle.text = subtitle_text
     title_box.text = title_text
     subtitle_box.text = subtitle_text
 
