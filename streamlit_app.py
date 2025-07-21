@@ -309,8 +309,10 @@ elif add_selectbox=="NIS2 assessment support":
             selected_category =[]
 
             for area in full_NIS2_w_ENISA:
+
+                for article in full_NIS2_w_ENISA[area]:
                 
-                selected_category.append([ full_NIS2_w_ENISA[area][0][0], full_NIS2_w_ENISA[area][0][1] ])
+                    selected_category.append([article[0], article[1]])
 
         else:
             selected_category = full_NIS2_w_ENISA[control_group]
