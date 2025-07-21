@@ -256,10 +256,14 @@ elif add_selectbox=="Discount validation":
 elif add_selectbox=="NIS2 assessment support":
 
 
-    st.write("Select areas in-scope or click FULL SCOPE below")
-    control_group = add_NIS2_area_selector(st)
-    selection_full_scope = st.checkbox("FULL SCOPE")
+    st.write("Select areas in-scope for the assessment:")
+
+    selection_full_scope = st.checkbox("All requirements (i.e. FULL SCOPE)")
     
+    if not selection_full_scope:
+        control_group = add_NIS2_area_selector(st)
+    st.write("______________________________________")
+
     # Intializing checkboxes
     st.write("Select reporting options:")
     selection_implementation_summary = st.checkbox("Implementation summary")
@@ -267,7 +271,7 @@ elif add_selectbox=="NIS2 assessment support":
     selection_risks = st.checkbox("Risks (Important - observations MUST be selected)")
     selection_applicability = st.checkbox("Include requirement text in responses?")
     st.write("NOTE: the assessment is ONLY performed against ENISA guidelines and article 23")
-
+    st.write("______________________________________")
     # Collecting basic info about the organization
     st.write("Enter basic information about the organization:")
     Industry = st.text_input(
