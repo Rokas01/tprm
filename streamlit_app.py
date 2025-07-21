@@ -294,6 +294,9 @@ elif add_selectbox=="NIS2 assessment support":
 
         full_NIS2_w_ENISA = doc_processor.read_document_w_categories("NIS2-breakdown", "enisa.txt", delims=["£", "$"], strip_new_line = True,  char_to_strip="")
  
+        percent_complete = 0
+        NIS2_progress_bar = st.progress(0, text="Processing...")
+
         if selection_full_scope:
             
             selected_category =[]
@@ -306,6 +309,11 @@ elif add_selectbox=="NIS2 assessment support":
 
         else:
             selected_category = full_NIS2_w_ENISA[control_group]
+
+
+        total_bar = len(selected_category)
+        progress_increment_1 = 100//total_bar
+
 
         part_2_response_article =[]
         part_2_response_AISummary =[]
@@ -320,6 +328,9 @@ elif add_selectbox=="NIS2 assessment support":
             article_text = file[1]
 
             part_2_response_article.append(article_title)
+
+            percent_complete = percent_complete + progress_increment_1
+            NIS2_progress_bar.progress(percent_complete, text="Processing...")
 
             if selection_implementation_summary:
 
@@ -400,6 +411,8 @@ elif add_selectbox=="NIS2 assessment support":
             pptx_temp_storage = [article_title, article_text, LLM_reply_summary, LLM_reply_findings, LLM_reply_risks]
             pptx_generator_input.append(pptx_temp_storage)
 
+            NIS2_progress_bar.progress(100, text="completed!")
+
         part_2_response = pd.DataFrame()
         part_2_response['Summary'] = part_2_response_AISummary
         part_2_response['Potential findings'] = part_2_response_AIFindings
@@ -478,6 +491,8 @@ elif add_selectbox=="ISO27k assessment support":
     pptx_generator_input = []
 
 
+
+
     if st.button("Process"):
 
         st.write(f" **Assessment summary**")
@@ -485,6 +500,9 @@ elif add_selectbox=="ISO27k assessment support":
         ISO_main_clauses =[]
 
         if selection_FUll_ISO27k:
+
+            percent_complete = 0
+            ISO_main_progress_bar = st.progress(0, text="Processing main ISO 27001 clauses...")
 
             full_ISO27k = doc_processor.read_document_w_categories("ISO27k", "Main.txt", delims=["#", "£"], strip_new_line = True,  char_to_strip="")
 
@@ -496,12 +514,18 @@ elif add_selectbox=="ISO27k assessment support":
 
                     ISO_main_clauses.append([article[0], article[1]])
 
+            total_bar = len(ISO_main_clauses)
+            progress_increment_1 = 100//total_bar
+
             for file in ISO_main_clauses:
 
                 article_title = file[0]
                 article_text = file[1]
 
                 part_2_response_article.append(article_title)
+
+                percent_complete = percent_complete + progress_increment_1
+                ISO_main_progress_bar.progress(percent_complete, text="Processing main ISO 27001 clauses...")
 
                 if selection_implementation_summary:
 
@@ -575,6 +599,9 @@ elif add_selectbox=="ISO27k assessment support":
 
                     LLM_reply_risks = openAI_processor(message3, selected_model)
 
+
+
+
                 
                 part_2_response_AIFindings.append(LLM_reply_findings)
 
@@ -583,6 +610,7 @@ elif add_selectbox=="ISO27k assessment support":
                 pptx_temp_storage = [article_title, article_text, LLM_reply_summary, LLM_reply_findings, LLM_reply_risks]
                 pptx_generator_input.append(pptx_temp_storage)
 
+                ISO_main_progress_bar.progress(100, text="Processing main ISO 27001 clauses...")
 
         if selection_include_annexA:
 
@@ -590,6 +618,10 @@ elif add_selectbox=="ISO27k assessment support":
             
             full_anenx_A = doc_processor.read_document_w_categories("ISO27k", "AnnexA.txt", delims=["£", "@"], strip_new_line = True,  char_to_strip="#")
             guidance = doc_processor.read_document_w_categories("ISO27k", "Guidance.txt", delims=["#"], strip_new_line = True, char_to_strip="@")
+
+            percent_complete = 0
+            AnnexA_progress_bar = st.progress(0, text="Processing Annex A...")
+
 
             if selection_full_scope_AnnexA:
                 
@@ -602,6 +634,10 @@ elif add_selectbox=="ISO27k assessment support":
             else:
                 AnenxA_clauses = full_anenx_A[control_group]
 
+            total_bar = len(AnenxA_clauses)
+            progress_increment_1 = 100//total_bar
+
+
             for file in AnenxA_clauses:
 
                 article_title = file[0]
@@ -609,6 +645,11 @@ elif add_selectbox=="ISO27k assessment support":
                 guidance_text = guidance[article_title][0][0]
 
                 part_2_response_article.append(article_title)
+
+
+                percent_complete = percent_complete + progress_increment_1
+                AnnexA_progress_bar.progress(percent_complete, text="Processing Annex A...")
+
 
                 if selection_implementation_summary:
 
@@ -691,6 +732,8 @@ elif add_selectbox=="ISO27k assessment support":
 
                 pptx_temp_storage = [article_title, article_text, LLM_reply_summary, LLM_reply_findings, LLM_reply_risks]
                 pptx_generator_input.append(pptx_temp_storage)
+
+                AnnexA_progress_bar.progress(100, text="Processing Annex A...")
 
 
         part_2_response = pd.DataFrame()
