@@ -437,12 +437,14 @@ elif add_selectbox=="ISO27k assessment support":
 
     st.write("Select controls in scope:")
     selection_FUll_ISO27k = st.checkbox("All main ISO 27001 controls")
-    selection_include_annexA = st.checkbox("Include Annex A?")
-    st.write("______________________________________")
-    st.write("Select Annex A area in scope (box above MUST be selected)")
-    control_group = add_ISMS_area_selector(st)
-    st.write("... or click FULL ANNEX A below to include all Annex A controls")
-    selection_full_scope_AnnexA = st.checkbox("FULL ANNEX A")
+    selection_include_annexA = st.checkbox("Annex A")
+
+    if selection_include_annexA:
+        st.write("______________________________________")
+        st.write("Select Annex A areas in scope:")
+        control_group = add_ISMS_area_selector(st)
+        st.write("... or click FULL ANNEX A below to include all Annex A controls")
+        selection_full_scope_AnnexA = st.checkbox("FULL ANNEX A")
     
     # Intializing checkboxes
     st.write("______________________________________")
@@ -508,85 +510,85 @@ elif add_selectbox=="ISO27k assessment support":
 
                 part_2_response_article.append(article_title)
 
-            if selection_implementation_summary:
+                if selection_implementation_summary:
 
-                message1 = [
-                {
-                    "role": "developer",
-                    "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
-                    1. ISO 27001:2022 requirement to audit against.
-                    2. Notes from the audit.
-                    Reply with a short and formal summary of how the requirement is implemented based on the notes provided.
-                    When replying, follow these rules:
-                    1. Do not repeat instructions.
-                    2. Do not repeat requirements.
-                    4. Use only the information provided in the notes, do not include any additional context.
-                    5. Maximum 200 words.
-                    6. Do not use bullet points, write as a one paragraph.
-                    7. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:".
-                    \n---\n
-                    Input 1 (article): \n---\n {article_title} {article_text} \n---\n
-                    Input 2 (Notes):  \n---\n {notes}""",
-                }
-                ]
+                    message1 = [
+                    {
+                        "role": "developer",
+                        "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                        1. ISO 27001:2022 requirement to audit against.
+                        2. Notes from the audit.
+                        Reply with a short and formal summary of how the requirement is implemented based on the notes provided.
+                        When replying, follow these rules:
+                        1. Do not repeat instructions.
+                        2. Do not repeat requirements.
+                        4. Use only the information provided in the notes, do not include any additional context.
+                        5. Maximum 200 words.
+                        6. Do not use bullet points, write as a one paragraph.
+                        7. If the information provided in the notes does not cover all requirements of the article, make it clear in a section called "Missing information:".
+                        \n---\n
+                        Input 1 (article): \n---\n {article_title} {article_text} \n---\n
+                        Input 2 (Notes):  \n---\n {notes}""",
+                    }
+                    ]
 
-                LLM_reply_summary = openAI_processor(message1, selected_model)
+                    LLM_reply_summary = openAI_processor(message1, selected_model)
 
-            part_2_response_AISummary.append(LLM_reply_summary)
+                part_2_response_AISummary.append(LLM_reply_summary)
 
-            if selection_observations:
+                if selection_observations:
 
-                message2 = [
-                {
-                    "role": "developer",
-                    "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
-                    1. ISO 27001:2022 requirement to audit against.
-                    2. Notes from the audit.
-                    Reply with a list of potential findings. Clearly state if the information provided is insufficient to conclude if there is a finding and propose follow-up questions.
-                    When replying, follow these rules:
-                    1. Do not repeat instructions.
-                    2. Only use the information from notes relevant to this requirement. Ignore irrelevant notes.
-                    3. Do not provide an implementation summary.
-                    4. Do not include risks or recommendations, only observations.
-                    5. Only include issues that are explicitly mentioned in the notes.
-                    6. If the implementation is not mentioned or the information is insufficient in the notes, do not assume it is a finding. Reply with "more information needed to conclude".
-                    100 words maximum per finding.
-                    \n---\n
-                    Input 1 (Requirement): \n---\n {article_title} {article_text} \n---\n
-                    Input 2 (Notes):  \n---\n {notes}""",
-                }
-                ]
+                    message2 = [
+                    {
+                        "role": "developer",
+                        "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                        1. ISO 27001:2022 requirement to audit against.
+                        2. Notes from the audit.
+                        Reply with a list of potential findings. Clearly state if the information provided is insufficient to conclude if there is a finding and propose follow-up questions.
+                        When replying, follow these rules:
+                        1. Do not repeat instructions.
+                        2. Only use the information from notes relevant to this requirement. Ignore irrelevant notes.
+                        3. Do not provide an implementation summary.
+                        4. Do not include risks or recommendations, only observations.
+                        5. Only include issues that are explicitly mentioned in the notes.
+                        6. If the implementation is not mentioned or the information is insufficient in the notes, do not assume it is a finding. Reply with "more information needed to conclude".
+                        100 words maximum per finding.
+                        \n---\n
+                        Input 1 (Requirement): \n---\n {article_title} {article_text} \n---\n
+                        Input 2 (Notes):  \n---\n {notes}""",
+                    }
+                    ]
 
-                LLM_reply_findings = openAI_processor(message2, selected_model)
+                    LLM_reply_findings = openAI_processor(message2, selected_model)
 
-                message3 = [
-                {
-                    "role": "developer",
-                    "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
-                    1. ISO 27001:2022 requirement to audit against.
-                    2. Audit findings
-                    You need to write risk statements for the provided findings. When replying, follow these rules:
-                    1. Do not repeat instructions.
-                    2. If the finding only references the fact that the information is missing or insufficent reply with "No specific risks - more infortmation needed".
-                    2. Only use the information from findings. 
-                    3. Do not include follow-up questions or next steps, only write risk statements.
-                    4. Reply with 100 words maximum for each risk.
-                    5. Apply good practice for writing IT risk statements by explaining why each risk is important.
-                    \n---\n
-                    Input 1 (requirement): \n---\n {article_title} {article_text} \n---\n
-                    Audit findings:  \n---\n {LLM_reply_findings}""",
-                }
-                ]
+                    message3 = [
+                    {
+                        "role": "developer",
+                        "content": f"""You are a cybersecurity audit assistant. I will provide with 2 inputs:
+                        1. ISO 27001:2022 requirement to audit against.
+                        2. Audit findings
+                        You need to write risk statements for the provided findings. When replying, follow these rules:
+                        1. Do not repeat instructions.
+                        2. If the finding only references the fact that the information is missing or insufficent reply with "No specific risks - more infortmation needed".
+                        2. Only use the information from findings. 
+                        3. Do not include follow-up questions or next steps, only write risk statements.
+                        4. Reply with 100 words maximum for each risk.
+                        5. Apply good practice for writing IT risk statements by explaining why each risk is important.
+                        \n---\n
+                        Input 1 (requirement): \n---\n {article_title} {article_text} \n---\n
+                        Audit findings:  \n---\n {LLM_reply_findings}""",
+                    }
+                    ]
 
-                LLM_reply_risks = openAI_processor(message3, selected_model)
+                    LLM_reply_risks = openAI_processor(message3, selected_model)
 
                 
-            part_2_response_AIFindings.append(LLM_reply_findings)
+                part_2_response_AIFindings.append(LLM_reply_findings)
 
-            part2_response_AIRisks.append(LLM_reply_risks)
+                part2_response_AIRisks.append(LLM_reply_risks)
 
-            pptx_temp_storage = [article_title, article_text, LLM_reply_summary, LLM_reply_findings, LLM_reply_risks]
-            pptx_generator_input.append(pptx_temp_storage)
+                pptx_temp_storage = [article_title, article_text, LLM_reply_summary, LLM_reply_findings, LLM_reply_risks]
+                pptx_generator_input.append(pptx_temp_storage)
 
 
         if selection_include_annexA:
@@ -694,7 +696,6 @@ elif add_selectbox=="ISO27k assessment support":
 
                 pptx_temp_storage = [article_title, article_text, LLM_reply_summary, LLM_reply_findings, LLM_reply_risks]
                 pptx_generator_input.append(pptx_temp_storage)
-
 
 
         part_2_response = pd.DataFrame()
