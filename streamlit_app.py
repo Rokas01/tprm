@@ -480,22 +480,18 @@ elif add_selectbox=="ISO27k assessment support":
         "Meeting notes:",
         placeholder="Enter your notes here")
     
+    part_2_response_article =[]
+    part_2_response_AISummary =[]
+    part_2_response_AIFindings = []
+    part2_response_AIRisks = []
+    pptx_generator_input = []
+
 
     if st.button("Process"):
 
         st.write(f" **Assessment summary**")
-
         
-        full_anenx_A = doc_processor.read_document_w_categories("ISO27k", "AnnexA.txt", delims=["£", "@"], strip_new_line = True,  char_to_strip="#")
-
         ISO_main_clauses =[]
-
-        part_2_response_article =[]
-        part_2_response_AISummary =[]
-        part_2_response_AIFindings = []
-        part2_response_AIRisks = []
-        pptx_generator_input = []
-
 
         if selection_FUll_ISO27k:
 
@@ -596,6 +592,8 @@ elif add_selectbox=="ISO27k assessment support":
         if selection_include_annexA:
 
             AnenxA_clauses =[]
+            
+            full_anenx_A = doc_processor.read_document_w_categories("ISO27k", "AnnexA.txt", delims=["£", "@"], strip_new_line = True,  char_to_strip="#")
             guidance = doc_processor.read_document_w_categories("ISO27k", "Guidance.txt", delims=["#"], strip_new_line = True, char_to_strip="@")
 
             if selection_full_scope_AnnexA:
@@ -606,13 +604,6 @@ elif add_selectbox=="ISO27k assessment support":
 
             else:
                 AnenxA_clauses = full_anenx_A[control_group]
-
-
-            part_2_response_article =[]
-            part_2_response_AISummary =[]
-            part_2_response_AIFindings = []
-            part2_response_AIRisks = []
-            pptx_generator_input = []
 
             for file in AnenxA_clauses:
 
@@ -703,6 +694,8 @@ elif add_selectbox=="ISO27k assessment support":
 
                 pptx_temp_storage = [article_title, article_text, LLM_reply_summary, LLM_reply_findings, LLM_reply_risks]
                 pptx_generator_input.append(pptx_temp_storage)
+
+
 
         part_2_response = pd.DataFrame()
         part_2_response['Summary'] = part_2_response_AISummary
