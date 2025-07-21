@@ -267,8 +267,8 @@ elif add_selectbox=="NIS2 assessment support":
     # Intializing checkboxes
     st.write("Select reporting options:")
     selection_implementation_summary = st.checkbox("Implementation summary")
-    selection_observations = st.checkbox("Observations")
-    selection_risks = st.checkbox("Risks (Important - observations MUST be selected)")
+    selection_observations = st.checkbox("Observations & risks")
+    #selection_risks = st.checkbox("Risks (Important - observations MUST be selected)")
     selection_applicability = st.checkbox("Include requirement text in responses?")
     st.write("NOTE: the assessment is ONLY performed against ENISA guidelines and article 23")
     st.write("______________________________________")
@@ -386,11 +386,6 @@ elif add_selectbox=="NIS2 assessment support":
 
                 LLM_reply_findings = openAI_processor(message2, selected_model)
 
-
-            part_2_response_AIFindings.append(LLM_reply_findings)
-
-            if selection_risks:
-
                 message3 = [
                 {
                     "role": "developer",
@@ -412,6 +407,8 @@ elif add_selectbox=="NIS2 assessment support":
 
                 LLM_reply_risks = openAI_processor(message3, selected_model)
 
+
+            part_2_response_AIFindings.append(LLM_reply_findings)
             part2_response_AIRisks.append(LLM_reply_risks)
 
             pptx_temp_storage = [article_title, article_text, LLM_reply_summary, LLM_reply_findings, LLM_reply_risks]
