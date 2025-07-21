@@ -40,16 +40,6 @@ def openAI_processor(prompt, model_to_use):
     return content
 
 
-def add_assessment_checkboxes(streamlit_object):
-
-    streamlit_object.write("Pelase select options:")
-    selection_implementation_summary = streamlit_object.checkbox("Implementation summary")
-    selection_observations = streamlit_object.checkbox("Observations")
-    selection_risks = streamlit_object.checkbox("Risks (Important - observations MUST be selected)")
-    selection_applicability = streamlit_object.checkbox("Include requirement text in responses?")
-    selection_27002 = streamlit_object.checkbox("Include ISO 27002 guidance when drafting observations?")
-    streamlit_object.write("NOTE: the assessment is ONLY perofrmed agaisnt ISO27001 Annex A and (optional) ISO27002")
-
 
 def add_ISMS_area_selector(stramlit_object):
 
@@ -96,7 +86,7 @@ def add_NIS2_area_selector(stramlit_object):
 
 def template_uploader():
 
-    return 0
+    return NotImplementedError
 
 
 
@@ -110,7 +100,7 @@ def text_preprocessing():
     part2_response_AIRisks = []
     pptx_generator_input = []
 
-    return 0
+    return NotImplementedError
 
 add_selectbox = st.sidebar.selectbox(
     "Please select use-case",
@@ -118,12 +108,8 @@ add_selectbox = st.sidebar.selectbox(
      "Discount validation", "NIS2 assessment support", "ISO27k assessment support", "CRA assessment support", "chat")
 )
 
-#presentation_template = st.sidebar.file_uploader(
-#    "Upload report template (pptx or ppt)", accept_multiple_files=False, type=[".pptx", ".ppt"]
-#)
 
 
-# Using "with" notation
 with st.sidebar:
 
     # Ask user for their OpenAI API key via `st.text_input`.
@@ -506,6 +492,10 @@ elif add_selectbox=="ISO27k assessment support":
                 
                 ISO_main_clauses.append([ full_ISO27k[area][0][0], full_ISO27k[area][0][1] ])
         
+                for article in full_ISO27k[area]:
+
+                    ISO_main_clauses.append([article[0], article[1]])
+
             for file in ISO_main_clauses:
 
                 article_title = file[0]
@@ -605,7 +595,9 @@ elif add_selectbox=="ISO27k assessment support":
                 
                 for area in full_anenx_A:
                     
-                    AnenxA_clauses.append([ full_anenx_A[area][0][0], full_anenx_A[area][0][1] ])
+                    for article in full_anenx_A[area]:
+
+                        AnenxA_clauses.append([article[0], article[1]])
 
             else:
                 AnenxA_clauses = full_anenx_A[control_group]
@@ -711,7 +703,7 @@ elif add_selectbox=="ISO27k assessment support":
 
         st.download_button(
             label="Download draft report",
-            data=prepare_download(pptx_generator_input, include_article=True, presentation_title="ISO 27001:2022 asessment"),
+            data=prepare_download(pptx_generator_input, include_article=True, presentation_title="ISO 27001:2022 asessment", template='template-ISMS.pptx'),
             file_name="ISMS-generated-draft-report.pptx",
             icon=":material/download:",
             key=2
