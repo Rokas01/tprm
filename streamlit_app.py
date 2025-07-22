@@ -935,21 +935,20 @@ elif add_selectbox=="chat":
 
     st.write(f"Prompt lenght: {len(notes)}")
 
-if st.button("Process") and len(notes) < 1000:
+    if st.button("Process") and len(notes) < 1000:
 
-    st.write(f" **Response:**")
+        st.write(f" **Response:**")
 
-    message = [
-    {
-        "role": "developer",
-        "content": f"""{notes}""",
-    }
-    ]
+        message = [
+        {
+            "role": "developer",
+            "content": f"""{notes}""",
+        }
+        ]
 
-    LLM_reply_summary = openAI_processor(message, selected_model)
+        LLM_reply_summary = openAI_processor(message, selected_model)
 
-    st.write(LLM_reply_summary)
-
+        st.write(LLM_reply_summary)
 
 
 else:
