@@ -925,43 +925,32 @@ elif add_selectbox=="CRA assessment support":
         )
 
 #=================================
-#CRA assessment support
+#Chat
 #=================================
 elif add_selectbox=="chat":
 
-    # Set a default model
-    if "openai_model" not in st.session_state:
-        st.session_state["openai_model"] = selected_model
+    notes = st.text_area(
+        "Input:",
+        placeholder="...")
 
-    # Initialize chat history
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    st.write(f"Prompt lenght: {len(notes)}")
 
-    # Display chat messages from history on app rerun
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+if st.button("Process") and len(notes) < 1000:
 
-    # Accept user input
-    if prompt := st.chat_input("What is up?"):
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        # Display user message in chat message container
-        with st.chat_message("user"):
-            st.markdown(prompt)
+    st.write(f" **Response:**")
+
+    message = [
+    {
+        "role": "developer",
+        "content": f"""{notes}""",
+    }
+    ]
+
+    LLM_reply_summary = openAI_processor(message, selected_model)
+
+    st.write(LLM_reply_summary)
 
 
-    with st.chat_message("assistant"):
-        stream = client.chat.completions.create(
-            model=st.session_state["openai_model"],
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ],
-            stream=True,
-        )
-        response = st.write_stream(stream)
-    st.session_state.messages.append({"role": "assistant", "content": response})
 
 else:
     st.write("Not yet implemented")
