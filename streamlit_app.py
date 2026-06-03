@@ -955,7 +955,7 @@ elif add_selectbox=="chat":
 #=================================
 #Proofreader
 #=================================
-elif add_selectbox=="proofreader":
+elif add_selectbox=="Proofreader":
 
     notes = st.text_area(
         "Input:",
@@ -982,7 +982,6 @@ elif add_selectbox=="proofreader":
         LLM_reply_summary = openAI_processor(message, proofreading_model)
 
         st.write(LLM_reply_summary)
-
 
 
 else:
