@@ -108,7 +108,7 @@ def text_preprocessing():
 add_selectbox = st.sidebar.selectbox(
     "Please select use-case",
     ("Document reviewer", "Duplicate checker", 
-     "Discount validation", "NIS2 assessment support", "ISO27k assessment support", "CRA assessment support", "chat")
+     "Discount validation", "NIS2 assessment support", "ISO27k assessment support", "CRA assessment support", "chat", "Proofreader")
 )
 
 
