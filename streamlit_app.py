@@ -15,8 +15,11 @@ st.set_page_config(page_title="AI prototyping", layout="wide")
 st.title("📄 AI prototyping")
 
 selected_model ="o4-mini"
+proofreading_model ="o4-mini"
 #selected_model ="o3-mini"
 #selected_model ="o3"
+#selected_model ="o4-mini-deep-research"
+
 
 def prepare_download(dict_to_use, include_article=True, presentation_title="NIS2 asessment", template='template-NIS2.pptx'):
 
@@ -935,7 +938,7 @@ elif add_selectbox=="chat":
 
     st.write(f"Prompt lenght: {len(notes)}")
 
-    if st.button("Process") and len(notes) < 1000:
+    if st.button("Process") and len(notes) < 1500:
 
         st.write(f" **Response:**")
 
@@ -949,6 +952,37 @@ elif add_selectbox=="chat":
         LLM_reply_summary = openAI_processor(message, selected_model)
 
         st.write(LLM_reply_summary)
+#=================================
+#Proofreader
+#=================================
+elif add_selectbox=="proofreader":
+
+    notes = st.text_area(
+        "Input:",
+        placeholder="...")
+
+    st.write(f"Prompt lenght: {len(notes)}")
+
+    if st.button("Process") and len(notes) < 5000:
+
+        st.write(f" **Response:**")
+
+        message = [
+        {
+            "role": "developer",
+            "content": f"""Act as a proofreading expert tasked with correcting grammatical errors in a given text. 
+            Your job is to analyze the text, identify any grammatical mistakes, and make the necessary corrections to ensure clarity and accuracy. 
+            This includes checking for proper sentence structure, punctuation, verb tense consistency, and correct usage of words. 
+            Additionally, provide suggestions to enhance the readability and flow of the text. 
+            The goal is to polish the text so that it communicates its message effectively and professionally. Do not provide additional suggestions. 
+            Do not change the context. Text: {notes}""",
+        }
+        ]
+
+        LLM_reply_summary = openAI_processor(message, proofreading_model)
+
+        st.write(LLM_reply_summary)
+
 
 
 else:
